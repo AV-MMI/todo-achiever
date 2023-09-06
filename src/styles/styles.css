@@ -13,10 +13,10 @@ main {
 	margin: 0px;
 }
 
-.center-flex {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+button {
+	cursor: pointer;
+	border: none;
+	transition: 0.3s;
 }
 
 .parent-grid {
@@ -30,13 +30,6 @@ main {
 	width: 99%;
 }
 
-.menu-display-grid {
-	grid-area: 1 / 1 / 2 / 2;
-	background-color: green;
-	width: 100%;
-	height: 100%;
-}
-
 .main-grid {
 	grid-area: 1 / 2 / 2 / 3;
 	background-color: yellow;
@@ -46,20 +39,99 @@ main {
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-template-rows: 1fr 10fr;
-	grid-row-gap: 0px;
-}
-
-.menu-do-grid {
-	grid-area: 1 / 1 / 2 / 2;
-	width: 100%;
-	height: 100%;
-	background-color: purple;
+	grid-row-gap: 5px;
 }
 
 .display-grid {
 	grid-area: 2 / 1 / 3 / 2;
 	width: 100%;
 	height: 100%;
-	background-color: cyan;
+	background-color: #232C33;
 }
 
+
+/*menu-display*/
+.menu-display-grid {
+	grid-area: 1 / 1 / 2 / 2;
+	background-color: #232C33;
+	width: 100%;
+	height: 100%;
+}
+
+.menu-opt-cont {
+	margin-top: 20px;
+	width: 100%;
+}
+
+.menu-btn-opt {
+	font-size: 25px;
+	width: 70%;
+	background-color: #212A31;
+	color: #DADFF7;
+	border-radius: 5px;
+}
+
+.menu-btn-opt:hover {
+	background-color: #313F49;
+	color: #FFF8F0;
+	border-radius: 10px;
+}
+
+
+/*menu-do / menu-preferences*/
+.menu-top-grid {
+	grid-area: 1 / 1 / 2 / 2;
+	width: 100%;
+	height: 100%;
+	background-color: #232C33;
+}
+
+.menu-do-cont {
+	padding-right: 10px;
+}
+
+.menuDo-opt-cont {
+	margin-right: 10px;
+}
+
+.menuDo-btn-opt {
+	font-size: 20px;
+	background-color: #39393A;
+	color: #FF206E;
+	border: 1px solid #333333;
+	border-radius: 10px;
+	width: 150px;
+}
+
+.menuDo-btn-opt:hover {
+	color: #FB5607;
+	background-color: #4C4B63;
+	border-color: #5386E4;
+}
+
+.menuDo-btn-opt:active {
+	color: #FFBE0B;
+	background-color: #626080;
+	border-color: #1446A0;
+	transition: 0s;
+}
+
+/*flex*/
+.center-center-flex {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.center-column-flex {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.center-row-flex {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+/*https://coolors.co/9dd9d2-ff312e-313f49-72b01d-fff8f0 -- color palette*/
