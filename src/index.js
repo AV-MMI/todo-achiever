@@ -5,10 +5,13 @@ const itemsStorage = {
 
 	projectAssigned: {},
 	noProjectAssigned: {},
+	projectsTree: {
+		unassigned: {},
+	}
 }
 
 class Task {
-	constructor(title, description, createdDay, dueDay, priority, project, status, code){
+	constructor(title, description, createdDay, dueDay, priority, project, status){
 		this.title = title;
 		this.createdDay = createdDay;
 		this.dueDay = dueDay;
@@ -36,45 +39,74 @@ class Note {
 }
 
 class Project {
-	constructor(title, text, project, code){
-		this.title;
-		this.text;
+	constructor(title, project, code){
+		this.title = title;
+		this.project = project;
 		this.code;
-	}
-
-	_tasks;
-	_notes;
-	_checklists;
-
-	get tasks(){
-		return _tasks;
-	}
-
-	set tasks(tasks){
-		_tasks = tasks;
-	}
-
-
-
-	get notes(){
-		return _notes;
-	}
-
-	set notes(notes){
-		_notes = notes
-	}
-
-
-
-	get checklists(){
-		return _checklist;
-	}
-
-	set checklists(checklists){
-		_checklist = checklists;
 	}
 }
 
+// low level function
+function getTypeOfItem(item){
+	return item.constructor.name.toLowerCase();
+}
+
+// low level function: checks wheter certain item is unique inside its level of closure
+function isUniqueThisItemInItsLevel(storage, item){
+	let tree = storage.projectsTree;
+	let isUnique = true;
+
+
+	//storage is empty
+	if(Object.keys(tree).length == 1){
+		return isUnique;
+	}
+	//storage is not empty
+	else {
+		//get type of item
+		const typeOfItem = getTypeOfItem(item);
+		if(typeOfItem == 'project'){
+			//is main project
+			if(item.project == ''){
+				for(let project in tree){
+					if(project == item.title){
+						console.log('is not unique')
+						isUnique = false;
+					}
+				}
+			}
+
+			// work below this line ----
+			//is sub project
+			else {
+				for(let obj in tree[item.project]){
+					if(obj == item.title){
+						isUnique = false;
+					}
+				}
+			}
+		} else { //item is no a project
+			// item is not assigned to a project
+			if(item.project == ''){
+				for(let obj in storage.noProjectAssigned){
+					if(storage.noProjectAssigned[obj].title == item.title){
+						isUnique = false;
+					}
+				}
+			}
+			// item is assigned to a project
+			else {
+				for(let obj in storage.projectAssigned[item.project]){
+					if(storage.projectAssigned[item.project][obj].title == item.title){
+						isUnique = false;
+					}
+				}
+			}
+		}
+
+		return isUnique;
+	}
+}
 // low level func for identifyItemAndSave
 function assignCodetoItem(item, storage){
 	//Obtain first letter identifier;
@@ -89,34 +121,45 @@ function assignCodetoItem(item, storage){
 // low level func for identifyItemAndSave
 	//save item to storage and in case of having the project prop !== '' assign to that project;
 function saveItemToStorage(item={}, storage={}){
-	//save item to storage
-	let typeOfItem = item.constructor.name.toLowerCase();
 
-	// if item is assigned to a project.
-	if(item.project !== ''){
-		// in case the project doesnt exist;
-		if(storage.projectAssigned[item.project] == undefined){
-			storage.projectAssigned[item.project] = {};
-			storage.projectAssigned[item.project][typeOfItem] = {};
-			storage.projectAssigned[item.project][typeOfItem][item.code] = {};
-			storage.projectAssigned[item.project][typeOfItem][item.code] = item;
+	let typeOfItem = getTypeOfItem(item);
+	//check if our item is a project
+	if(typeOfItem == 'project'){
+		//check if project is already created
+		if(isUniqueThisItemInItsLevel(storage, item) && item.project == ""){
+			console.log(isUniqueThisItemInItsLevel(storage, item))
+			storage.projectAssigned[item.title] = {};
+			storage.projectsTree[item.title] = {};
+		} else {
+			console.log('such project already exist')
 		}
-		else {
-			storage.projectAssigned[item.project][typeOfItem][item.code] = {};
-			storage.projectAssigned[item.project][typeOfItem][item.code] = item;
-		}
-	} else {
-	// if item is not assigned to any project;
-	storage.noProjectAssigned[typeOfItem] = {};
-	storage.noProjectAssigned[typeOfItem][item.code] = {};
 	}
+		//true: it is a project
+		//false: it is not a project
+
 
 	return;
 }
 
-function identifyItemAndSave(item, storage){
+// high level func
+function identifyItemAndSave(item={}, storage={}){
 	assignCodetoItem(item, storage);
 	saveItemToStorage(item, storage);
 
 	return
 }
+
+function removeItemFromStorage(item={}, storage={}){
+	//check if item is assigned to a project
+		//check what kind of item is
+
+}
+
+
+let test3 = new Project('secondP', '');
+let test4 = new Project('secondP', '');
+
+console.log('itemsStorage1', itemsStorage)
+identifyItemAndSave(test3, itemsStorage);
+identifyItemAndSave(test4, itemsStorage);
+console.log('itemsStorage2', itemsStorage)
