@@ -173,21 +173,31 @@ function identifyItemAndSave(item={}, storage={}){
 }
 
 function removeItemFromStorage(item={}, storage={}){
-	//check if item is assigned to a project
-		//check what kind of item is
+	let typeOfItem = getTypeOfItem(item);
+	//item is a project
+	if(typeOfItem == 'project'){
+		//check if it's main project or subproject
+		if(item.project == ""){
+			//is a main project
+			delete storage['projectAssigned'][item.title];
+			delete storage['projectsTree'][item.title];
+		} else {
+			//is a subproject
+			delete storage['projectAssigned'][item.project][item.title];
+			delete storage['projectsTree'][item.project][item.title];
+		}
+	} else {
+	//item is not a project
+		//check if it is assigned to a project;
+		if(item.project == ''){
+			// is not assigned to a project
+			delete storage['noProjectAssigned'][item.code];
 
+		} else {
+			// it is assigned to a project
+			delete storage['projectAssigned'][item.project][item.code];
+		}
+	}
+
+	return;
 }
-
-
-let test1 = new Project('secondP', '');
-let test2 = new Task('first Task', 'secondP', 'top');
-let noPro = new Task('second Task', '', 'low');
-let proDont = new Task('third Task', 'testing', 'low');
-let proDosnt = new Task('fourth Task', 'testing', 'low');
-console.log('itemsStorage1', itemsStorage)
-identifyItemAndSave(test1, itemsStorage);
-identifyItemAndSave(test2, itemsStorage);
-identifyItemAndSave(noPro, itemsStorage);
-identifyItemAndSave(proDont, itemsStorage);
-identifyItemAndSave(proDosnt, itemsStorage);
-console.log('itemsStorage2', itemsStorage)
