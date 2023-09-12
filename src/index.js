@@ -11,7 +11,7 @@ const itemsStorage = {
 }
 
 class Task {
-	constructor(title, description, createdDay, dueDay, priority, project, status){
+	constructor(title, project, priority, status='pending', description='', createdDay='', dueDay=''){
 		this.title = title;
 		this.createdDay = createdDay;
 		this.dueDay = dueDay;
@@ -56,7 +56,6 @@ function isUniqueThisItemInItsLevel(storage, item){
 	let tree = storage.projectsTree;
 	let isUnique = true;
 
-
 	//storage is empty
 	if(Object.keys(tree).length == 1){
 		return isUnique;
@@ -70,13 +69,12 @@ function isUniqueThisItemInItsLevel(storage, item){
 			if(item.project == ''){
 				for(let project in tree){
 					if(project == item.title){
-						console.log('is not unique')
 						isUnique = false;
 					}
 				}
 			}
 
-			// work below this line ----
+			// work below th, this line ----
 			//is sub project
 			else {
 				for(let obj in tree[item.project]){
@@ -89,7 +87,8 @@ function isUniqueThisItemInItsLevel(storage, item){
 			// item is not assigned to a project
 			if(item.project == ''){
 				for(let obj in storage.noProjectAssigned){
-					if(storage.noProjectAssigned[obj].title == item.title){
+					console.log({obj, item})
+					if(obj.title == item.title){
 						isUnique = false;
 					}
 				}
@@ -97,7 +96,7 @@ function isUniqueThisItemInItsLevel(storage, item){
 			// item is assigned to a project
 			else {
 				for(let obj in storage.projectAssigned[item.project]){
-					if(storage.projectAssigned[item.project][obj].title == item.title){
+					if(obj.title == item.title){
 						isUnique = false;
 					}
 				}
@@ -125,18 +124,41 @@ function saveItemToStorage(item={}, storage={}){
 	let typeOfItem = getTypeOfItem(item);
 	//check if our item is a project
 	if(typeOfItem == 'project'){
+		//true: it is a project
 		//check if project is already created
 		if(isUniqueThisItemInItsLevel(storage, item) && item.project == ""){
-			console.log(isUniqueThisItemInItsLevel(storage, item))
 			storage.projectAssigned[item.title] = {};
 			storage.projectsTree[item.title] = {};
+			return;
 		} else {
-			console.log('such project already exist')
+			return;
+		}
+	}else{
+	//false: it is not a project
+		//it is not unique
+		if(!isUniqueThisItemInItsLevel(storage,item)){
+			console.log('such item already exist');
+			return;
+		} else {
+		//it is unique
+			//no project assigned
+			if(item.project == ''){
+				storage.noProjectAssigned[item.code] = item;
+				return;
+			} else {
+			//project assigned
+				//project already exist
+				if(storage.projectAssigned.hasOwnProperty(item.project)){
+					storage.projectAssigned[item.project][item.code] = item;
+				} else {
+				//project doesnt exist
+					let newProject = new Project(item.project, '');
+					identifyItemAndSave(newProject, storage);
+					saveItemToStorage(item, storage);
+				}
+			}
 		}
 	}
-		//true: it is a project
-		//false: it is not a project
-
 
 	return;
 }
@@ -156,10 +178,15 @@ function removeItemFromStorage(item={}, storage={}){
 }
 
 
-let test3 = new Project('secondP', '');
-let test4 = new Project('secondP', '');
-
+let test1 = new Project('secondP', '');
+let test2 = new Task('first Task', 'secondP', 'top');
+let noPro = new Task('second Task', '', 'low');
+let proDont = new Task('third Task', 'testing', 'low');
+let proDosnt = new Task('fourth Task', 'testing', 'low');
 console.log('itemsStorage1', itemsStorage)
-identifyItemAndSave(test3, itemsStorage);
-identifyItemAndSave(test4, itemsStorage);
+identifyItemAndSave(test1, itemsStorage);
+identifyItemAndSave(test2, itemsStorage);
+identifyItemAndSave(noPro, itemsStorage);
+identifyItemAndSave(proDont, itemsStorage);
+identifyItemAndSave(proDosnt, itemsStorage);
 console.log('itemsStorage2', itemsStorage)
