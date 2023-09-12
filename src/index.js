@@ -155,6 +155,7 @@ function saveItemToStorage(item={}, storage={}){
 					let newProject = new Project(item.project, '');
 					identifyItemAndSave(newProject, storage);
 					saveItemToStorage(item, storage);
+					return;
 				}
 			}
 		}
