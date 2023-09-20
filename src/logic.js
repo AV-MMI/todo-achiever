@@ -23,10 +23,11 @@ class Task {
 }
 
 class Checklist {
-	constructor(title, project, items={}){
+	constructor(title, project, items={}, status='pending'){
 		this.title = title.toLowerCase();
 		this.project = project.toLowerCase();
 		this.items = items;
+		this.status = status;
 	}
 }
 
@@ -39,16 +40,21 @@ class Note {
 }
 
 class Project {
-	constructor(title, project='', code){
+	constructor(title, project='', code, status='pending'){
 		this.title = title.toLowerCase();
 		this.project = project;
 		this.code;
+		this.status = status;
 	}
 }
 
 // low level function
 function getTypeOfItem(item){
-	return item.constructor.name.toLowerCase();
+	if(item){
+		return item.constructor.name.toLowerCase();
+	} else {
+		return item
+	}
 }
 
 // low level function: checks wheter certain item is unique inside its level of closure
@@ -106,7 +112,24 @@ function isUniqueThisItemInItsLevel(item, storage){
 		return isUnique;
 	}
 }
+
+// low level function: gets the main project from the item passed.
+function getMainProjectOf(item, storage){
+	let subproject = item.project;
+	let mainProject;
+
+	for(let project in storage['projectsTree']){
+		if(storage['projectsTree'][project][subproject]){
+				mainProject = storage['projectsTree'][project];
+				break;
+		}
+	}
+
+	return mainProject;
+}
+
 // low level func for identifyItemAndSave
+// CRUD - Create -helper
 function assignCodetoItem(item, storage){
 	// Obtain first letter identifier;
 	let letter = item.constructor.name[0];
@@ -125,22 +148,8 @@ function assignCodetoItem(item, storage){
 
 	return;
 }
-
-// low level function: gets the main project from the item passed.
-function getMainProjectOf(item, storage){
-	let subproject = item.project;
-	let mainProject;
-
-	for(let project in storage['projectsTree']){
-		if(storage['projectsTree'][project][subproject]){
-				mainProject = storage['projectsTree'][project];
-				break;
-		}
-	}
-
-	return mainProject;
-}
 // low level func for identifyItemAndSave
+// CRUD - Create -helper
 	// save item to storage and in case of having the project prop !== '' assign to that project;
 function saveItemToStorage(item={}, storage={}){
 
@@ -174,6 +183,7 @@ function saveItemToStorage(item={}, storage={}){
 				let newProject = new Project(item.project);
 
 				identifyItemAndSave(newProject, storage);
+				saveItemToStorage(item, storage);
 			}
 		}
 	}
@@ -256,7 +266,7 @@ function removeItemFromStorage(item={}, storage={}){
 	return;
 }
 
-// CRUD - Edit
+// CRUD - Edit -helper
 function turnProjectIntoSubproject(formerMainproject={}, parentProject={}, storage={}){
 	// copying obj from formarMainProject
 	let subproject = JSON.parse(JSON.stringify( storage['projectAssigned'][formerMainproject.title] ));
@@ -273,8 +283,8 @@ function turnProjectIntoSubproject(formerMainproject={}, parentProject={}, stora
 	return
 }
 
-// CRUD - Edit
-function turnSubprojectIntoMainproject(){
+// CRUD - Edit -helper
+function turnSubprojectIntoMainproject(item, storage){
 
 }
 
@@ -308,103 +318,52 @@ function modifyItem(item, data=[], storage){
 	let typeOfItem = getTypeOfItem(item);
 	// check if it is a project
 	if(typeOfItem == 'project'){
-		// check it is a main project;
-		if(item.project == ''){
-			//check that it has such property
-			if(item.hasOwnProperty(data[0])){
-				if(data[0] == 'title'){
-					console.log(storage['projectAssigned'][item.title]['code'], 'a')
-					Object.defineProperty(storage['projectAssigned'][item.title], data[0], { value: data[1], writable: true,});
-					console.log(storage['projectAssigned'][item.title]['code'], 's')
-					updateProjectPropInChildren(item, storage);
-					return
+		if(item.hasOwnProperty(data[0])){
+			// check for special case
+			if(data[0] == 'project'){
+				// from sub to main
+				if(item.project !== '' && data[1] == ''){
+					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.project][item.title] ));
+					storageItem.project = '';
+
+					storage['projectAssigned'][storageItem.title] = storageItem;
+					storage['projectsTree'][storageItem.title] = { title:item.title, project:'', code:item.code, status:item.status };
+
+					delete storage['projectAssigned'][item.project][item.title];
+					delete storage['projectsTree'][item.project][item.title];
 				}
 
-				storage['projectAssigned'][item.title][data[0]] = data[1];
-				storage['projectsTree'][item.title][data[0]] = data[1];
+				// from main to sub
+				else if(item.project == '' && data[1] !== ''){
+					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.title] ));
+					storageItem.project = data[1];
+					console.log(storageItem, 'storage')
 
-				return;
-			} else {
-				console.log(`${item.title} doesn't have such property ${data[0]}`);
-			}
-		} else {
-		//it is a subproject
-			//check that it has such property
-			if(item.hasOwnProperty(data[0])){
-				if(data[0] == 'title'){
-					storage['projectAssigned'][item.title] = data[1];
-					storage['projectsTree'][item.title]= data[1];
-					updateProjectPropInChildren(item, storage);
-					return
-				}
+					storage['projectAssigned'][storageItem.project] = storageItem;
+					storage['projectsTree'][storageItem.project][storage.item] = { title:item.title, project:'', code:item.code, status:item.status }
 
+					delete storage['projectAssigned'][storageItem.title];
+					delete storage['projectsTree'][storageItem.title];
 
-				storage['projectAssigned'][item.project][item.title][data[0]] = data[1];
-				storage['projectsTree'][item.project][item.title][data[0]] = data[1];
-
-				return;
-			} else {
-				console.log(`${item.title} doesn't have such property ${data[0]}`);
-			}
-		}
-	} else {
-		// item is not a project
-		// check if item is assigned to a project
-		if(item.project == ''){
-			// is not assigned to a project
-			// check that it contains such property
-			if(item.hasOwnProperty(data[0])){
-				storage['noProjectAssigned'][item.code][data[0]] = data[1];
-
-				return;
-			} else {
-				console.log(`${item.code} doesn't have such property ${data[0]}`)
-			}
-		} else {
-			// check if such project is main project
-			if(storage['projectsTree'].hasOwnProperty(item.project)){
-				if(item.hasOwnProperty(data[0])){
-					storage['projectAssigned'][item.project][item.code][data[0]] = data[1];
-				} else {
-					console.log(`There is no such property ${data[0]} in ${item.title}`);
-				}
-
-				return;
-			} else {
-				// it is a subproject
-				let mainProject = getMainProjectOf(item, itemsStorage);
-
-				if(mainProject){
-					if(item.hasOwnProperty(data[0])){
-						storage['projectAssigned'][mainProject][item.project][item.code][data[0]] = data[1];
-						console.log('j', storage['projectAssigned'][mainProject][item.project][item.code], item)
-						return;
-					} else {
-						console.log(`There is no such property ${data[0]} in ${item.title}`);
-					}
-
-				} else {
-					console.log(`subproject ${item.project} doesn't have a main project, and it is not a main project`);
 				}
 			}
 		}
 	}
+
+	// item is not a project
+	else {
+	}
 }
 
 let project1 = new Project('project1', '');
-let taskN = new Task('test new function', '');
-
 let project2 = new Project('formerMP', 'project1');
-let task2 = new Task('testing the convertion', 'formerMP');
-let note1 = new Note('new note', 'ramdom text', 'formerMP');
-
-let project4 = new Project('windforce', 'physics');
+let project3 = new Project('windforce', 'physics');
 /*identifyItemAndSave(project1, itemsStorage);
 identifyItemAndSave(task1, itemsStorage);*/
 identifyItemAndSave(project1, itemsStorage);
 identifyItemAndSave(project2, itemsStorage);
 
-identifyItemAndSave(project4, itemsStorage);
+identifyItemAndSave(project3, itemsStorage);
 
 // testing no-projects items
 // no project assign
@@ -424,5 +383,10 @@ let task6 = new Task('Ana-Gabriel', 'music');
 identifyItemAndSave(task6, itemsStorage);
 
 
+// deep copy of newWind to test the main to sub, then the sub to sub
+let newWind = itemsStorage['projectAssigned']['windforce'];
+console.log('newWind', newWind, getTypeOfItem(newWind));
+modifyItem(project3, ['project', ''], itemsStorage);
+modifyItem(newWind, ['project', 'music'], itemsStorage);
+
 console.log(itemsStorage, '0 iteration');
-//modifyItem(project2, ['title', 'top secret'], itemsStorage);
