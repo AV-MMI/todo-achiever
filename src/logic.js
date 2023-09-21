@@ -177,7 +177,7 @@ function saveItemToStorage(item={}, storage={}){
 		if(item.project == ''){
 			if(isUniqueThisItemInItsLevel(item, storage)){
 				storage['projectAssigned'][item.title] = item;
-				storage['projectsTree'][item.title] = item;
+				storage['projectsTree'][item.title] = { title:item.title, project:'', code:item.code, status:item.status };
 			} else {
 				console.log('already exist a main project with this name');
 			}
@@ -189,7 +189,7 @@ function saveItemToStorage(item={}, storage={}){
 			if(storage['projectAssigned'][item.project]){
 				if(isUniqueThisItemInItsLevel(item, storage)){
 					storage['projectAssigned'][item.project][item.title] = item;
-					storage['projectsTree'][item.project][item.title] = item;
+					storage['projectsTree'][item.project][item.title] = { title:item.title, project:'', code:item.code, status:item.status };
 				} else {
 					console.log('already exist a sub project with this name');
 				}
@@ -283,51 +283,6 @@ function removeItemFromStorage(item={}, storage={}){
 	return;
 }
 
-// CRUD - Edit -helper
-function turnProjectIntoSubproject(formerMainproject={}, parentProject={}, storage={}){
-	// copying obj from formarMainProject
-	let subproject = JSON.parse(JSON.stringify( storage['projectAssigned'][formerMainproject.title] ));
-	// assing own propertys that corresponds to our new subproject
-	Object.assign(subproject, formerMainproject);
-	subproject.project = parentProject.title;
-
-	storage['projectAssigned'][parentProject.title][subproject.title] = subproject;
-	storage['projectsTree'][parentProject.title][subproject.title] = subproject;
-
-	delete storage['projectsTree'][formerMainproject.title];
-	delete storage['projectAssigned'][formerMainproject.title];
-
-	return
-}
-
-// CRUD - Edit -helper
-function turnSubprojectIntoMainproject(item, storage){
-
-}
-
-// CRUD - Edit
-	// transfer item from project to project
-function transferItemFromProjectToProject(item, projectFrom, projectTo){
-
-}
-
-// low level function: to help modifyItem() in the case that the property modified
-// is the title of a project, and such new title must be assigned to every child of
-// such project.
-function updateProjectPropInChildren(projectItem, storage){
-	let childrenObj;
-	// check if it is a main project
-	if(projectItem['project'] == ''){
-		for(let prop in storage['projectAssigned'][projectItem.title]){
-			if(storage['projectAssigned'][projectItem.title].hasOwnProperty(prop)){
-				console.log(storage['projectAssigned'], 'item');
-			}
-		}
-	} else {
-	// it is a subproject
-	}
-}
-
 // CRUD - Edit
 	// modify item: can only modify the properties the obj already has.
 	// special cases: data[0]==title, data[0]==pŕoject
@@ -340,52 +295,74 @@ function modifyItem(item, data=[], storage){
 			if(data[0] == 'project'){
 				// from sub to main
 				if(item.project !== '' && data[1] == ''){
-					console.log('from main to sub');
 					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.project][item.title] ));
-					storageItem.project = '';
-
-					storage['projectAssigned'][storageItem.title] = storageItem;
-					storage['projectsTree'][storageItem.title] = { title:item.title, project:'', code:item.code, status:item.status };
+					storageItem[data[0]] = data[1];
 
 					delete storage['projectAssigned'][item.project][item.title];
 					delete storage['projectsTree'][item.project][item.title];
 
-					return;
+					saveItemToStorage(storageItem, storage);
 				}
 
 				// from main to sub
 				if(item.project == '' && data[1] !== ''){
 					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.title]));
-					storageItem.project = data[1];
-					console.log(storageItem, 'storageItem');
+					storageItem[data[0]] = data[1];
 
-					// main project exist
+					// main project does NOT exist
 					if(!storage['projectsTree'][storageItem.project]){
 						let mainProject = new Project(storageItem.project);
 						identifyItemAndSave(mainProject, storage);
 					}
 
 					delete storage['projectAssigned'][item.title];
-					delete storage['projectsTree'][item.title]
+					delete storage['projectsTree'][item.title];
 
-					storage['projectsTree'][storageItem.project][storageItem.title] = { title:storageItem.title, project:storageItem.project, code:item.code, status:item.status };
-					storage['projectAssigned'][storageItem.project][storageItem.title] = storageItem;
-
+					saveItemToStorage(storageItem, storage);
 				}
 			}
 
 			// check for special case
 			else if(data[0] == 'title'){
+				let dcItem;
+				let dcTree;
 				// item is main project
 				if(item.project == ''){
-					storage['projectsTree'][item.title]['title'] =
+					dcItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.title] ));
+					dcItem[data[0]] = data[1];
+
+					dcTree = JSON.parse(JSON.stringify( storage['projectsTree'][item.title] ));
+					dcTree[data[0]] = data[1];
+
+					storage['projectAssigned'][dcItem.title] = dcItem;
+					storage['projectsTree'][dcTree.title] = dcTree;
+
+					// update all children items
+					for(let property in storage['projectAssigned'][dcItem.title]){
+						if(property !== 'title' && property !== 'project'
+						&& property !== 'status' && property !== 'code'){
+							storage['projectAssigned'][dcItem.title][property]['project'] = dcItem.title;
+						}
+					}
+
+					// update all subprojects
+					for(let property in storage['projectsTree'][dcItem.title]){
+						if(property !== 'title' && property !== 'project'
+						&& property !== 'status' && property !== 'code'){
+							storage['projectsTree'][dcItem.title][property]['project'] = dcItem.title;
+						}
+					}
+					delete storage['projectAssigned'][item.title];
+					delete storage['projectsTree'][item.title]
+
+
 				}
 				// item is sub project
 
-				// change item prop
-
 				// change project title in children items
 			}
+		} else {
+			console.log(`such property ${data[0]} doesnt exist in the current item`);
 		}
 	}
 
@@ -396,12 +373,13 @@ function modifyItem(item, data=[], storage){
 
 let project1 = new Project('project1', '');
 let project2 = new Project('formerMP', 'project1');
+let projectPh = new Project('physics');
 let project3 = new Project('windforce', 'physics');
 /*identifyItemAndSave(project1, itemsStorage);
 identifyItemAndSave(task1, itemsStorage);*/
 identifyItemAndSave(project1, itemsStorage);
 identifyItemAndSave(project2, itemsStorage);
-
+identifyItemAndSave(projectPh, itemsStorage)
 identifyItemAndSave(project3, itemsStorage);
 
 // testing no-projects items
@@ -414,16 +392,11 @@ let task4 = new Task('pressure difference', 'physics');
 identifyItemAndSave(task4, itemsStorage);
 
 	// sub project
-let task5 = new Task('Inconditionality', 'windforce');
+let task5 = new Task('Inconditionality', 'project1');
 identifyItemAndSave(task5, itemsStorage);
 
 	//project does NOT exist
 let task6 = new Task('Ana-Gabriel', 'music');
 identifyItemAndSave(task6, itemsStorage);
 
-
-modifyItem(project3, ['project', ''], itemsStorage);
-console.log(itemsStorage, '0 iteration');
-
-modifyItem(project1, ['project', 'musicas'], itemsStorage);
 console.log(itemsStorage, '1 iteration');
