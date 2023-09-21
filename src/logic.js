@@ -50,11 +50,28 @@ class Project {
 
 // low level function
 function getTypeOfItem(item){
-	if(item){
-		return item.constructor.name.toLowerCase();
-	} else {
-		return item
+	if(item.constructor.name == 'Object'){
+		let codeInitial = item.code[0];
+		switch(codeInitial){
+			case 'P':
+			return 'project';
+			break;
+
+			case 'T':
+			return 'task';
+			break;
+
+			case 'N':
+			return 'note';
+			break;
+
+			case 'C':
+			return 'checklist';
+			break;
+		}
 	}
+
+	return item.constructor.name.toLowerCase();
 }
 
 // low level function: checks wheter certain item is unique inside its level of closure
@@ -323,6 +340,7 @@ function modifyItem(item, data=[], storage){
 			if(data[0] == 'project'){
 				// from sub to main
 				if(item.project !== '' && data[1] == ''){
+					console.log('from main to sub');
 					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.project][item.title] ));
 					storageItem.project = '';
 
@@ -331,21 +349,42 @@ function modifyItem(item, data=[], storage){
 
 					delete storage['projectAssigned'][item.project][item.title];
 					delete storage['projectsTree'][item.project][item.title];
+
+					return;
 				}
 
 				// from main to sub
-				else if(item.project == '' && data[1] !== ''){
-					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.title] ));
+				if(item.project == '' && data[1] !== ''){
+					let storageItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.title]));
 					storageItem.project = data[1];
-					console.log(storageItem, 'storage')
+					console.log(storageItem, 'storageItem');
 
-					storage['projectAssigned'][storageItem.project] = storageItem;
-					storage['projectsTree'][storageItem.project][storage.item] = { title:item.title, project:'', code:item.code, status:item.status }
+					// main project exist
+					if(!storage['projectsTree'][storageItem.project]){
+						let mainProject = new Project(storageItem.project);
+						identifyItemAndSave(mainProject, storage);
+					}
 
-					delete storage['projectAssigned'][storageItem.title];
-					delete storage['projectsTree'][storageItem.title];
+					delete storage['projectAssigned'][item.title];
+					delete storage['projectsTree'][item.title]
+
+					storage['projectsTree'][storageItem.project][storageItem.title] = { title:storageItem.title, project:storageItem.project, code:item.code, status:item.status };
+					storage['projectAssigned'][storageItem.project][storageItem.title] = storageItem;
 
 				}
+			}
+
+			// check for special case
+			else if(data[0] == 'title'){
+				// item is main project
+				if(item.project == ''){
+					storage['projectsTree'][item.title]['title'] =
+				}
+				// item is sub project
+
+				// change item prop
+
+				// change project title in children items
 			}
 		}
 	}
@@ -383,10 +422,8 @@ let task6 = new Task('Ana-Gabriel', 'music');
 identifyItemAndSave(task6, itemsStorage);
 
 
-// deep copy of newWind to test the main to sub, then the sub to sub
-let newWind = itemsStorage['projectAssigned']['windforce'];
-console.log('newWind', newWind, getTypeOfItem(newWind));
 modifyItem(project3, ['project', ''], itemsStorage);
-modifyItem(newWind, ['project', 'music'], itemsStorage);
-
 console.log(itemsStorage, '0 iteration');
+
+modifyItem(project1, ['project', 'musicas'], itemsStorage);
+console.log(itemsStorage, '1 iteration');
