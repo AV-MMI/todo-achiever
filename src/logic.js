@@ -3,8 +3,8 @@ import './styles/styles.css';
 const itemsStorage = {
 	counter: 0,
 
-	projectAssigned: {},
-	noProjectAssigned: {},
+	projectAssigned: { depot: true },
+	noProjectAssigned: { depot: true },
 	projectsTree: {
 		unassigned: {},
 	}
@@ -50,28 +50,30 @@ class Project {
 
 // low level function
 function getTypeOfItem(item){
-	if(item.constructor.name == 'Object'){
-		let codeInitial = item.code[0];
-		switch(codeInitial){
-			case 'P':
-			return 'project';
-			break;
+	return item.constructor.name.toLowerCase();
+}
 
-			case 'T':
-			return 'task';
-			break;
+// low level function
+function getItemFrom(data=[], storage={}){
+	let match = null;
 
-			case 'N':
-			return 'note';
-			break;
+	for(let item in storage){
+		if(storage[item]['depot'] || getTypeOfItem(storage[item]) == 'project'){
+			match = getItemFrom(data, storage[item]);
 
-			case 'C':
-			return 'checklist';
-			break;
+			if(match){
+				return match;
+			}
 		}
+
+		else if(storage[item][data[0]] == data[1]){
+			return storage[item];
+
+		}
+
 	}
 
-	return item.constructor.name.toLowerCase();
+	return match;
 }
 
 // low level function: checks wheter certain item is unique inside its level of closure
@@ -144,6 +146,7 @@ function getMainProjectOf(item, storage){
 
 	return mainProject;
 }
+
 
 // low level func for identifyItemAndSave
 // CRUD - Create -helper
@@ -223,9 +226,9 @@ function saveItemToStorage(item={}, storage={}){
 			// project is a sub project
 
 			else if(!storage['projectsTree'][item.project] && getMainProjectOf(item, storage)){
-				let mainProject = getMainProjectOf(item, storage);
+				let mainProject = getMainProjectOf(item, storage).title;
 
-				storage['projectAssigned'][mainProject.title][item.project][item.code] = item;
+				storage['projectAssigned'][mainProject][item.project][item.code] = item;
 			}
 
 			// project doesnt exist: so create it as a main project
@@ -352,14 +355,55 @@ function modifyItem(item, data=[], storage){
 							storage['projectsTree'][dcItem.title][property]['project'] = dcItem.title;
 						}
 					}
+
 					delete storage['projectAssigned'][item.title];
 					delete storage['projectsTree'][item.title]
 
-
 				}
 				// item is sub project
+				if(item.project !== ''){
+					let dcItem = JSON.parse(JSON.stringify( storage['projectAssigned'][item.project][item.title] ));
+					dcItem[data[0]] = data[1];
 
-				// change project title in children items
+					let dcTree = JSON.parse(JSON.stringify( storage['projectsTree'][item.project][item.title] ));
+					dcTree[data[0]] = data[1];
+
+					storage['projectAssigned'][dcItem.project][dcItem.title] = dcItem;
+					storage['projectsTree'][dcItem.project][dcTree.title] = dcTree;
+
+					// update all children items
+					for(let property in storage['projectAssigned'][dcItem.project][dcItem.title]){
+						if(property !== 'title' && property !== 'project'
+						&& property !== 'status' && property !== 'code'){
+							storage['projectAssigned'][dcItem.project][dcItem.title][property]['project'] = dcItem.title;
+						}
+					}
+
+					// update all subprojects
+					for(let property in storage['projectsTree'][dcItem.project][dcItem.title]){
+						if(property !== 'title' && property !== 'project'
+						&& property !== 'status' && property !== 'code'){
+							storage['projectsTree'][dcItem.project][dcItem.title][property]['project'] = dcItem.title;
+						}
+					}
+
+					delete storage['projectAssigned'][item.project][item.title];
+					delete storage['projectsTree'][item.project][item.title]
+				}
+			}
+
+			// change prop
+			else {
+				// main project
+				if(item.project == ''){
+					itemsStorage['projectAssigned'][item.title][data[0]] = data[1]
+					itemsStorage['projectsTree'][item.title][data[0]] = data[1];
+				}
+				// sub project
+				else {
+					itemsStorage['projectAssigned'][item.project][item.title][data[0]] = data[1];
+					itemsStorage['projectsTree'][item.project][item.title][data[0]] = data[1];
+				}
 			}
 		} else {
 			console.log(`such property ${data[0]} doesnt exist in the current item`);
@@ -368,6 +412,100 @@ function modifyItem(item, data=[], storage){
 
 	// item is not a project
 	else {
+		if(item.hasOwnProperty(data[0])){
+			// special case: changing projects
+			if(data[0] == 'project'){
+				// transfer of item is to a project different to where it is at this time.
+				if(item.project !== data[1]){
+					let dcItem = JSON.parse(JSON.stringify( item ));
+					dcItem[data[0]] = data[1];
+
+					// from noProject
+					if(item.project == ''){
+						console.log('from no project')
+						// to main project
+						if(storage['projectAssigned'][dcItem.project]){
+							storage['projectAssigned'][dcItem.project][dcItem.code] = dcItem;
+						}
+						// to sub project
+						else {
+							let mainProject = getMainProjectOf(dcItem, storage).title;
+							storage['projectAssigned'][mainProject][dcItem.project][dcItem.code] = dcItem;
+						}
+
+						delete storage['noProjectAssigned'][item.code];
+					}
+					// from main project
+					else if(storage['projectAssigned'][item.project]){
+
+						// to no project
+						if(data[1] == ''){
+							storage['noProjectAssigned'][dcItem.code] = dcItem;
+						}
+
+						// to main project
+						else if(storage['projectsTree'][data[1]]){
+							storage['projectAssigned'][data[1]][dcItem.code] = dcItem;
+						}
+
+						// to sub project
+						else {
+							let mainProject = getMainProjectOf(dcItem, storage).title;
+							storage['projectAssigned'][mainProject][dcItem.project][dcItem.code] = dcItem;
+						}
+
+						delete storage['projectAssigned'][item.project][item.code];
+					}
+					// from sub project
+					else {
+						 item.mainProject = getMainProjectOf(item, storage).title;
+
+						// to no project
+						if(data[1] == ''){
+							storage['noProjectAssigned'][dcItem.code] = dcItem;
+						}
+
+						// to main project
+						else if(storage['projectsTree'][dcItem.project]){
+							storage['projectAssigned'][dcItem.project][dcItem.code] = dcItem;
+						}
+
+						// to sub project
+						else {
+							let mainProject = getMainProjectOf(dcItem, storage).title;
+							storage['projectAssigned'][mainProject][dcItem.project][dcItem.code] = dcItem;
+						}
+
+						delete storage['projectAssigned'][item.mainProject][item.project][item.code];
+					}
+				}
+				else{
+				console.log(`You can NOT transfer this item to the same project where it already is`);
+				}
+			}
+			else {
+
+				// item is not assigned to a project
+				if(item.project == ''){
+					storage['noProjectAssigned'][item.code][data[0]] = data[1];
+				}
+
+				// item is in main project
+				else if(storage['projectAssigned'][item.project]){
+					storage['projectAssigned'][item.project][item.code][data[0]] = data[1]
+				}
+
+				// item is in sub project
+				else {
+					let mainProject = getMainProjectOf(item, storage).title;
+
+					storage['projectAssigned'][mainProject][item.project][item.code][data[0]] = data[1]
+				}
+			}
+
+		} else {
+			console.log(`This item does NOT contain the property ${data[0]}`);
+		}
 	}
 }
 
@@ -388,15 +526,21 @@ let taskUn = new Task('testing unassigned', '');
 identifyItemAndSave(taskUn, itemsStorage);
 
 	// main project
-let task4 = new Task('pressure difference', 'physics');
+let task4 = new Task('passing around', '');
 identifyItemAndSave(task4, itemsStorage);
 
 	// sub project
-let task5 = new Task('Inconditionality', 'project1');
+let task5 = new Task('Inconditionality', 'physics');
 identifyItemAndSave(task5, itemsStorage);
 
 	//project does NOT exist
-let task6 = new Task('Ana-Gabriel', 'music');
+let task6 = new Task('Ana-Gabriel', 'windforce');
 identifyItemAndSave(task6, itemsStorage);
 
+let task21 = new Task('premium', 'formermp');
+identifyItemAndSave(task21, itemsStorage);
+
+
+modifyItem(task6, ['title', 'target'], itemsStorage);
 console.log(itemsStorage, '1 iteration');
+console.log(getItemFrom(['title', 'target'], itemsStorage), 'dinheiro');
