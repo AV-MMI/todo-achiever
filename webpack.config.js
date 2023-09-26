@@ -5,7 +5,11 @@ module.exports = {
 	mode: 'development',
 
   entry: {
-  	logic: './src/logic.js',
+  	index: './src/index.js',
+    utilities: './src/modules/utilities.js',
+    crud: './src/modules/crud.js',
+    dom: './src/modules/dom.js',
+    storage: './src/modules/storage.js',
   },
 
   devtool: 'inline-source-map',
