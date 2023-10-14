@@ -1,33 +1,12 @@
-export { getTypeOfItem, getItemFrom, isUniqueThisItemInItsLevel, getMainProjectOf }
+export { getTypeOfItem, isUniqueThisItemInItsLevel, getMainProjectOf }
 
 function getTypeOfItem(item){
 	return item.constructor.name.toLowerCase();
 }
 
-function getItemFrom(data=[], storage={}){
-	let match = null;
-
-	for(let item in storage){
-		if(storage[item]['depot'] || getTypeOfItem(storage[item]) == 'project'){
-			match = getItemFrom(data, storage[item]);
-
-			if(match){
-				return match;
-			}
-		}
-
-		else if(storage[item][data[0]] == data[1]){
-			return storage[item];
-
-		}
-
-	}
-
-	return match;
-}
-
 function isUniqueThisItemInItsLevel(item, storage){
 	let tree = storage.projectsTree;
+	console.log('tree', tree)
 	let isUnique = true;
 
 	// storage is empty

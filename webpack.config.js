@@ -9,7 +9,7 @@ module.exports = {
     utilities: './src/modules/utilities.js',
     crud: './src/modules/crud.js',
     dom: './src/modules/dom.js',
-    storage: './src/modules/storage.js',
+    repository: './src/modules/repository.js',
   },
 
   devtool: 'inline-source-map',
