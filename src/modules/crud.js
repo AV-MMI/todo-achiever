@@ -42,7 +42,7 @@ class Project {
 }
 
 // CRUD - Create
-function createItem(item, storage=repository.getItems){
+function createItem(item, storage=repository.getItems()){
 	repository.identifyItemAndSave(item, storage)
 
 	return
@@ -126,4 +126,4 @@ repository.identifyItemAndSave(task21, repository.getItems()	);
 
 //modifyItem(task6, ['project', 'formermp'], repository.getItems());
 */
-console.log(repository.getItems()	, '1 iteration');
+console.log(repository.getItems(), '1 iteration');

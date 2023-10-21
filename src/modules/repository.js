@@ -5,11 +5,18 @@ export { getProjectPath, getItems, identifyItemAndSave, removeItem, modifyItem,g
 const _itemsStorage = {
 	counter: 0,
 
-	projectAssigned: { depot: true },
-	noProjectAssigned: { depot: true },
+	projectAssigned: { depot: true, name: 'projectAssigned', },
+	noProjectAssigned: { depot: true, name: 'noProjectAssigned', },
 	projectsTree: {
 		unassigned: {},
+		name: 'projectsTree',
 	}
+}
+
+function createItem(item, storage=repository.getItems){
+	repository.identifyItemAndSave(item, storage)
+
+	return
 }
 
 // high level function - to export
@@ -68,22 +75,21 @@ function _assignCodetoItem(item, storage){
 // n param: act as a pointer for route during recursion.
 
 function addItem(item, route=[], storage, n=0){
-	if(item.title == 'taskito'){
-		console.log('brilla', route, storage, n)
+	if(item.title == 'taskito' && n==0){
+		console.log(storage['name'], 'tan tuyaaaaaaaaa')
+		debugger
 	}
 	if(storage){
 		if(storage['title'] == item.project){
 			if(utilities.getTypeOfItem(item) == 'project'){
-				console.log(item['title'], 'test<<<<<<<<<<<oooooooo')
 				storage[item.title] = item;
 			} else {
-				console.log(item.title, utilities.getTypeOfItem(item), storage, '<<<<<<<<------------')
 				storage[item.code] = item;
+				console.log('non-project being assigned', storage)
 			}
 		} else {
 			addItem(item, route, storage[route[n]], n+1)
 		}
-		return
 	}
 
 	return
@@ -98,20 +104,21 @@ function _saveItemToStorage(item={}, storage=getItems()){
 				let projectPath = getProjectPath(item.project, storage);
 				addItem(item, projectPath, storage['projectsTree']);
 				addItem(item, projectPath, storage['projectAssigned']);
-				console.log(item['title'], 'test project', storage['projectsTree'])
 			} else {
 				let projectPath = getProjectPath(item.project, storage);
-				addItem(item, projectPath, storage['projectAssigned']);
-				console.log(item.title, projectPath, storage['projectAssigned'], '><<<<<<<<<<--------');
+				addItem(item, projectPath, storage['projectsTree']);
+
 			}
 		}
 		// it is not assigned
 		else {
 			if(utilities.getTypeOfItem(item) == 'project'){
+				storage['projectAssigned'][item.title] = item;
 				storage['projectsTree'][item.title] = item;
 			}
-			
-			storage['noProjectAssigned'][item.code] = item;
+			else {
+				storage['noProjectAssigned'][item.code] = item;
+			}
 		}
 	}
 }
