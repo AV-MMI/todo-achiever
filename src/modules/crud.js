@@ -51,11 +51,12 @@ function createItem(item, storage=repository.getItems()){
 // CRUD - Remove
 function removeItem(item={}, storage){
 	let route = repository.getProjectPath(item.project, storage);
-	if(utilities.getTypeOfItem(item) == 'project'){
-		repository.removeItem(item, storage['projectsTree'], route);
-	}
 
-	repository.removeItem(item, storage['projectAssigned'], route);
+	if(utilities.getTypeOfItem(item) == 'project' || item.project !== ''){
+		repository.removeItem(item, storage['projectAssigned'], route);
+	} else {
+		repository.removeItem(item, storage['noProjectAssigned'], route);
+	}
 	return
 }
 
@@ -81,7 +82,7 @@ let project3 = new Project('sbsbproject1', 'sbproject1');
 let project4 = new Project('sbsbproject2', 'sbproject1');
 
 let task1 = new Task('taskito', 'sbproject1');
-let task2 = new Task('taskazo', 'sbsbproject2');
+let task2 = new Task('taskazo', '');
 
 //let project3 = new Project('sbproject2', 'sbproject1');
 /*
@@ -93,6 +94,8 @@ createItem(project2, repository.getItems()	);
 createItem(project3, repository.getItems()	);
 createItem(project4, repository.getItems()	);
 createItem(task1, repository.getItems()	);
+createItem(task2, repository.getItems()	);
+removeItem(task2, repository.getItems() );
 //createItem(task2, repository.getItems()	);
 
 //modifyItem(project2, ['project', 'fuera'], repository.getItems() );

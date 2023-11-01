@@ -5,18 +5,8 @@ export { getProjectPath, getItems, identifyItemAndSave, removeItem, modifyItem,g
 const _itemsStorage = {
 	counter: 0,
 
-	projectAssigned: { depot: true, name: 'projectAssigned', },
-	noProjectAssigned: { depot: true, name: 'noProjectAssigned', },
-	projectsTree: {
-		unassigned: {},
-		name: 'projectsTree',
-	}
-}
-
-function createItem(item, storage=repository.getItems){
-	repository.identifyItemAndSave(item, storage)
-
-	return
+	projectAssigned: {depot: true, },
+	noProjectAssigned: {depot: true, }
 }
 
 // high level function - to export
@@ -24,6 +14,8 @@ function getItems(){
 	return _itemsStorage;
 }
 
+//
+// returns an array with the route of projects in which is nested projectTitle.
 function getProjectPath(projectTitle, storage){
 	let project = getItemFrom(['title', projectTitle], storage);
 	let route = [];
@@ -74,21 +66,16 @@ function _assignCodetoItem(item, storage){
 // item param is the item to be appended to the last project on route,
 // n param: act as a pointer for route during recursion.
 
-function addItem(item, route=[], storage, n=0){
-	if(item.title == 'taskito' && n==0){
-		console.log(storage['name'], 'tan tuyaaaaaaaaa')
-		debugger
-	}
+function _addItem(item, route=[], storage, n=0){
 	if(storage){
 		if(storage['title'] == item.project){
 			if(utilities.getTypeOfItem(item) == 'project'){
 				storage[item.title] = item;
 			} else {
 				storage[item.code] = item;
-				console.log('non-project being assigned', storage)
 			}
 		} else {
-			addItem(item, route, storage[route[n]], n+1)
+			_addItem(item, route, storage[route[n]], n+1)
 		}
 	}
 
@@ -100,21 +87,13 @@ function _saveItemToStorage(item={}, storage=getItems()){
 	if(item){
 		// is assigned
 		if(item.project !== ''){
-			if(utilities.getTypeOfItem(item) == 'project'){
-				let projectPath = getProjectPath(item.project, storage);
-				addItem(item, projectPath, storage['projectsTree']);
-				addItem(item, projectPath, storage['projectAssigned']);
-			} else {
-				let projectPath = getProjectPath(item.project, storage);
-				addItem(item, projectPath, storage['projectsTree']);
-
-			}
+			let projectPath = getProjectPath(item.project, storage);
+			_addItem(item, projectPath, storage['projectAssigned']);
 		}
 		// it is not assigned
 		else {
 			if(utilities.getTypeOfItem(item) == 'project'){
 				storage['projectAssigned'][item.title] = item;
-				storage['projectsTree'][item.title] = item;
 			}
 			else {
 				storage['noProjectAssigned'][item.code] = item;
@@ -125,23 +104,15 @@ function _saveItemToStorage(item={}, storage=getItems()){
 
 // high level function - to export
 function removeItem(item, storage, route=[], n=0){
-	if(storage){
-		if(storage['title'] == item.project){
-			if(utilities.getTypeOfItem(item) == 'project'){
-				delete storage[item.title];
-			} else {
-				delete storage[item.code];
-			}
-		}
-		else {
-			removeItem(item, storage[route[n]], route, n+1);
-		}
+	console.log(storage, '<<------', item.code)
+	if(utilities.getTypeOfItem(item) == 'project' || item.project !== ''){}
+	else {
+		delete storage[item.code];
 	}
 }
 
 function modifyItem(item, data, storage, route, n=0){
 	if(storage){
-	//console.log(storage, '<<<<<<<<<<<<<<<<<storage')
 		if(storage['title'] == item.project){
 			if(utilities.getTypeOfItem(item, storage) == 'project'){
 				//special cases for project
