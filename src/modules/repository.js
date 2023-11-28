@@ -1,6 +1,6 @@
 import * as utilities from './utilities.js'
 import * as crud from './crud.js'
-export { getProjectPath, getItems, identifyItemAndSave, removeItem, modifyItem,getItemFrom }
+export { getProjectPath, getItems, identifyItemAndSave, removeItem, modifyItem, getItemFrom }
 
 const _itemsStorage = {
 	counter: 0,
@@ -92,7 +92,7 @@ function _saveItemToStorage(item={}, storage=getItems()){
 		}
 		// it is not assigned
 		else {
-			if(utilities.getTypeOfItem(item) == 'project'){
+			if(utilities.getTypeOfItem(item) == 'project' || item['code'][0] == 'p'){
 				storage['projectAssigned'][item.title] = item;
 			}
 			else {
@@ -104,41 +104,83 @@ function _saveItemToStorage(item={}, storage=getItems()){
 
 // high level function - to export
 function removeItem(item, storage, route=[], n=0){
-	console.log(storage, '<<------', item.code)
-	if(utilities.getTypeOfItem(item) == 'project' || item.project !== ''){}
+	if(utilities.getTypeOfItem(item) == 'project' || item.project !== ''){
+		if(storage){
+			if(storage['title'] == item.project){
+				if(utilities.getTypeOfItem(item) == 'project'){
+					delete storage[item.title];
+				} else {
+					delete storage[item.code];
+				}
+			}
+			else {
+				removeItem(item, storage[route[n]], route, n+1);
+			}
+		}
+	}
 	else {
 		delete storage[item.code];
 	}
 }
 
+// an special case is when a change requires more than just reassign the new value
 function modifyItem(item, data, storage, route, n=0){
 	if(storage){
-		if(storage['title'] == item.project){
-			if(utilities.getTypeOfItem(item, storage) == 'project'){
+		if(storage['title'] == item.project || route.length == 0){
+			// item is a project -->
+			if(utilities.getTypeOfItem(item) == 'project'){
 				//special cases for project
+					// modify project property: change a project to main, or sub.
 				if(data[0] == 'project'){
-					//console.log('brazos, enjoy', storage)
-					let childItems = Object.keys(storage[item.title]);
-					//console.log(childItems, 'childItems <-----ñ')
-					for(let i = 0; i < childItems.length; i++){
-						if(storage[item.title][childItems[i]]['title']){
-							storage[item.title][childItems[i]]['project'] = data[1];
-						}
-					}
-
 					storage[item.title][data[0]] = data[1];
-					let route = getProjectPath(['title', data[1]], storage);
-
+					_saveItemToStorage(storage[item.title]);
+					delete storage[item.title];
 				}
-				else if(data[0] == 'title'){}
 
-				//no special case at all
+					//modify title property
+				else if(data[0] == 'title'){
+
+					let itemChildren = Object.keys(storage[item.title]);
+						// obtain child items and change their correspondent prop to match the new title
+						for(let child in itemChildren){
+							if(itemChildren[child] !== 'title' && itemChildren[child] !== 'project' && 
+								itemChildren[child] !== 'status' && itemChildren[child] !== 'code'){
+								storage[item.title][itemChildren[child]]['project'] = data[1];
+							};
+						}
+
+						// assign new title to project
+						let tmpItem = JSON.parse(JSON.stringify(storage[item.title]));
+						tmpItem[data[0]] = data[1];
+						_saveItemToStorage(tmpItem);
+
+						delete storage[item.title];
+				}
+
+					//normal case
 				else {
 					storage[item.title][data[0]] = data[1];
-					console.log('no special case')
 				}
-			} else {
-				//special cases for non-project
+			}
+
+			// <-- item is a project
+
+			// item is NOT a project
+			else {
+				// special cases for non-project
+					// modify project prop
+				if(data[0] == 'project'){
+					let tmpItem = JSON.parse(JSON.stringify(storage[item.code]));
+					tmpItem[data[0]] = data[1];
+
+					delete storage[item.code];
+					_saveItemToStorage(tmpItem);
+				}
+
+				else {
+					// normal case
+					storage[item.code][data[0]] = data[1];
+				}
 			}
 		}
 		else {

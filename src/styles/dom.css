@@ -1,0 +1,145 @@
+button {
+	background-color: none;
+}
+
+.v-flex {
+	display: flex;
+	flex-direction: column;
+}
+.v-c-flex {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.c-c-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.left-c-flex {
+	display: flex;
+	align-items: center;
+	justify-content: left;
+}
+
+/* general style for item*/
+.crud-grid {
+	display: grid;
+	grid-template-areas: "itemCheck itemTitle itemOptions";
+	width: inherit;
+}
+
+.item {
+	max-width: 350px;
+	margin: 20px;
+}
+
+.line-container {
+  background-color: #F4EAE0;
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr;
+  grid-template-rows: 1fr;
+  min-height: 25px;
+  border: 2px solid black;
+}
+
+/*general elements of items*/
+.check-cont {
+ 	grid-area: itemCheck;
+	width: 100%;
+	height: 100%;
+}
+
+.check-btn {
+	width: 100%;
+	height: 100%;
+	transition: 0.2s;
+}
+
+.check-btn-pending:hover {
+	color: #7071E8;
+}
+
+.check-btn-progress {
+	color: #7071E8;
+}
+
+.check-btn-progress:hover {
+	color: #9ADE7B;;
+}
+
+.check-btn-done {
+	color: #9ADE7B;
+}
+
+.title-cont {
+	grid-area: itemTitle;
+	width: 100%;
+	height: 100%;
+}
+
+.delete-cont {
+	width: 100%;
+	height: 100%;
+}
+
+.delete-btn {
+	width: 100%;
+	height: 100%;
+	transition: 0.2s;
+}
+
+.delete-btn:hover {
+	color: red;
+}
+
+
+/*Specific  to type/kind of item*/
+.rec-wrapper {
+	background-color: blue;
+	height: auto;
+}
+
+.rec-wrapper > .item {
+	margin: 0px;
+}
+
+.rec-bottom {
+	height: auto;
+	width: inherit;
+	background-color: #FDF7E4;
+	border-left: 2px solid black;
+	border-right: 2px solid black;
+	border-bottom: 2px solid black;
+	padding: 10px;
+	word-wrap: break-word
+}
+
+	/*task in checklist*/
+.task-wrapper {
+
+}
+
+.point-btn {
+	height: 15px;
+	width: 15px;
+	border-radius: 3px;
+	border: 2px solid #39A7FF;
+	margin: 5px;
+}
+
+.point-btn:hover {
+	background-color: #87C4FF;
+}
+
+.point-btn-done {
+	border: 2px solid #427D9D;
+	background-color: #9BBEC8;
+}
+
+.crossTitle {
+	text-decoration-line: line-through;
+	opacity: 0.5;
+}
