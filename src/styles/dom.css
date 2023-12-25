@@ -46,32 +46,21 @@ button {
 }
 
 /*general elements of items*/
-.check-cont {
- 	grid-area: itemCheck;
-	width: 100%;
-	height: 100%;
-}
-
 .check-btn {
-	width: 100%;
-	height: 100%;
-	transition: 0.2s;
+	height: 15px;
+	width: 15px;
+	border-radius: 3px;
+	border: 2px solid #39A7FF;
+	margin: 5px;
 }
 
-.check-btn-pending:hover {
-	color: #7071E8;
-}
-
-.check-btn-progress {
-	color: #7071E8;
-}
-
-.check-btn-progress:hover {
-	color: #9ADE7B;;
+.check-btn:hover {
+	background-color: #87C4FF;
 }
 
 .check-btn-done {
-	color: #9ADE7B;
+	border: 2px solid #427D9D;
+	background-color: #9BBEC8;
 }
 
 .title-cont {
@@ -79,6 +68,11 @@ button {
 	width: 100%;
 	height: 100%;
 }
+
+.crossTitle {
+	text-decoration-line: line-through;
+}
+
 
 .delete-cont {
 	width: 100%;
@@ -114,32 +108,15 @@ button {
 	border-right: 2px solid black;
 	border-bottom: 2px solid black;
 	padding: 10px;
+	padding-left: 20px;
 	word-wrap: break-word
 }
 
-	/*task in checklist*/
-.task-wrapper {
-
+	/*checklist*/
+.checklist-item {
+	padding-left: 40px;
 }
 
-.point-btn {
-	height: 15px;
-	width: 15px;
-	border-radius: 3px;
-	border: 2px solid #39A7FF;
-	margin: 5px;
-}
-
-.point-btn:hover {
-	background-color: #87C4FF;
-}
-
-.point-btn-done {
-	border: 2px solid #427D9D;
-	background-color: #9BBEC8;
-}
-
-.crossTitle {
-	text-decoration-line: line-through;
-	opacity: 0.5;
+.task-wrapper > button {
+	margin-right: 15px;
 }

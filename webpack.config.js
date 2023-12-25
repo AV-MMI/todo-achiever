@@ -6,10 +6,9 @@ module.exports = {
 
   entry: {
   	index: './src/index.js',
-    utilities: './src/modules/utilities.js',
-    crud: './src/modules/crud.js',
+    logic: './src/modules/logic.js',
     dom: './src/modules/dom.js',
-    repository: './src/modules/repository.js',
+    data: './src/modules/data.js',
   },
 
   devtool: 'inline-source-map',

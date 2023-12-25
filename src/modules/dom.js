@@ -1,11 +1,9 @@
-import * as crud from './crud.js'
-import * as repository from './repository.js';
-import * as utilities from './utilities.js';
+import * as logic from './logic.js'
+import * as data from './data.js';
 
-export { createLineItem, createRecItem };
 
 // for projects and tasks
-function createLineItem(item){
+function _createLineItem(item){
 	// create elements
 	let lineCont = document.createElement('div');
 
@@ -19,7 +17,7 @@ function createLineItem(item){
 	let deleteBtn = document.createElement('button');
 
 	// assign classes
-	if(utilities.getTypeOfItem(item) == 'project'){
+	if(item.type == 'project'){
 		lineCont.classList.add('itemProject');
 	}
 
@@ -28,19 +26,7 @@ function createLineItem(item){
 	checkCont.classList.add('check-cont', 'c-c-flex');
 
 		// get what class should we use depending on the state of the item.status
-	let statusClass = (()=>{
-		if(item.status == 'pending'){
-			return 'check-btn-pending';
-		}
-
-		else if(item.status == 'progress'){
-			return 'check-btn-progress';
-		}
-
-		else if(item.status == 'done'){
-			return 'check-btn-done';
-		}
-	})();
+	let statusClass = item.done ? 'check-btn-done' : 'noclass';
 
 	checkBtn.classList.add('check-btn', statusClass);
 
@@ -50,10 +36,13 @@ function createLineItem(item){
 	deleteBtn.classList.add('delete-btn');
 
 	// assign content
-	lineCont.setAttribute('id', item.code);
-	checkBtn.textContent = '[O]';
+	lineCont.setAttribute('id', item.id);
 	itemTitle.textContent = item.title;
 	deleteBtn.textContent = '[X]';
+
+	// add corresponding eventListeners
+	checkBtn.addEventListener('click', changeStatus);
+	deleteBtn.addEventListener('click', deleteItem);
 
 	// append elements
 	lineCont.appendChild(checkCont);
@@ -70,14 +59,13 @@ function createLineItem(item){
 }
 
 // for checklists and notes
-function createRecItem(item){
+function _createRecItem(item){
 	// create elements
 	let recWrapper = document.createElement('div');
-	let headCont = createLineItem(item);
-
+	let headCont = _createLineItem(item);
 		// bottom
 	let bottomCont = document.createElement('div');
-	if(utilities.getTypeOfItem(item) == 'note'){
+	if(item.type == 'note'){
 		// creating each p element in base to its paragraph.
 		for(let paragraph in item.text){
 			let p = document.createElement('p');
@@ -86,13 +74,11 @@ function createRecItem(item){
 		}
 	}
 
-	if(utilities.getTypeOfItem(item) == 'checklist'){
+	if(item.type == 'checklist'){
 		// creating each item in checklist
-		console.log('it is a checklist');
 		for(let task in item.items){
-			console.log(item.items[task], '<<<------ Task');
 			let taskWrapper = document.createElement('div');
-			let pointBtn = document.createElement('button');
+			let checkBtn = document.createElement('button');
 			let title = document.createElement('span');
 
 			// getting what class should we use dependin of the state of item.status
@@ -101,19 +87,24 @@ function createRecItem(item){
 
 			// assign classes
 			taskWrapper.classList.add('task-wrapper', 'left-c-flex');
-			pointBtn.classList.add('point-btn', status);
+			checkBtn.classList.add('check-btn', status);
 			title.classList.add(crossTitle);
 
 			// assign text
 			title.textContent = item.items[task]['title'];
 
 			// append elements
-			taskWrapper.appendChild(pointBtn);
+			taskWrapper.appendChild(checkBtn);
 			taskWrapper.appendChild(title);
 
 			bottomCont.appendChild(taskWrapper);
 		}
+
+		bottomCont.classList.add('checklist-item');
 	}
+
+	// assign id to the wrapper
+	recWrapper.setAttribute('id', item.id)
 
 	// assign classes
 	recWrapper.classList.add('rec-wrapper', 'item');
@@ -124,4 +115,50 @@ function createRecItem(item){
 	recWrapper.appendChild(bottomCont);
 
 	return recWrapper;
+}
+
+// function in charge of reducing the number of invokations to 1 from 4 in the process of creating
+// an item component. It will take an serie of inputs which will be the property of the object, and will
+// create the component in base to its type.
+function createItemComponent(item){
+	if(item){
+		let tempItem;
+		if(item.type == 'task'){
+			tempItem = new logic.Task(item.title, item.project, item.done);
+			//data.identifyItemAndSave(tempItem, data.getStorage());
+			tempItem = _createLineItem(tempItem);
+		} else {
+			tempItem = item.type == 'note' ? new logic.Note(item.title, item.project, item.done, item.type, item.text) : new logic.Checklist(item.title, item.project, item.done, item.type, item.items);
+			//data.identifyItemAndSave(tempItem, data.getStorage());
+			tempItem = _createRecItem(tempItem);
+		}
+
+		return tempItem;
+	}
+}
+
+// allow us to create direc
+function createProject(item){
+	let tempPro = new logic.Project(item.title, item.project, item.done);
+	//data.identifyItemAndSave(tempPro);
+
+
+	if(item.project == ""){
+
+	}
+	else {
+
+	}
+}
+
+// event listeners
+
+function changeStatus(e){
+	let itemId = (e.target.parentElement.parentElement.id);
+	//let item = data.
+}
+
+function deleteItem(e){
+	alert('deleteItem')
+	return;
 }
