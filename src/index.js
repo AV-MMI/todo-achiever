@@ -62,17 +62,32 @@ let dummyTask3 = {
 	done: false,
 	type: 'task',
 }
-data.storage.addObj(dummyProject1)
-data.storage.addObj(dummyProject2)
-data.storage.addObj(dummyProject3)
 
-data.storage.addObj(dummyTask1)
-data.storage.addObj(dummyTask2)
-data.storage.addObj(dummyTask3)
+let dummyChecklist = {
+	title: 'weekly buying',
+	project: '',
+	done: false,
+	type: 'checklist',
+	items: [{'done': false, 'title': 'lettuce'},
+			{'done': true, 'title': 'tomato'},
+			{'done': false, 'title': 'chicken'}],
+}
+logic.createItem(dummyProject1);
+logic.createItem(dummyProject2);
+logic.createItem(dummyProject3);
+
+logic.createItem(dummyTask1);
+logic.createItem(dummyTask2);
+logic.createItem(dummyTask3);
 
 
-data.storage.addObj(dummytest)
-data.storage.addObj(dummytest1)
+logic.createItem(dummytest);
+logic.createItem(dummytest1);
 
+logic.createItem(dummyChecklist);
+let checkList = data.storage.getObj(['title', dummyChecklist.title]);
+
+let displayContent = document.getElementById('window-content')
+dom.displayObj(checkList, displayContent);
 data.storage.updateObj( data.storage.getObj(['id', 'p0']), ['daone', true] )
 console.log(data.storage['objs'], '<-storage[objs]');

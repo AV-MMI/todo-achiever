@@ -82,7 +82,7 @@ const storage = {
 
 				// project doesnot exist
 				else {
-					let projectHost = new logic.Project(obj.project, '', false, 'project');
+					let projectHost = logic.createItem(obj);
 					this.addObj(projectHost);
 					this.addObj(obj);
 				}
