@@ -5,8 +5,6 @@ import * as dom from './modules/dom.js';
 import * as logic from './modules/logic.js'
 import * as data from './modules/data.js';
 
-let target = document.getElementById('display-cont');
-
 let dummyProject1 = {
 	title: 'pro1',
 	project: '',
@@ -14,7 +12,7 @@ let dummyProject1 = {
 	type: 'project',
 }
 
-let dummyProject2 = {
+	let dummyProject2 = {
 	title: 'pro2',
 	project: 'pro1',
 	done: false,
@@ -87,7 +85,20 @@ logic.createItem(dummytest1);
 logic.createItem(dummyChecklist);
 let checkList = data.storage.getObj(['title', dummyChecklist.title]);
 
-let displayContent = document.getElementById('window-content')
-dom.displayObj(checkList, displayContent);
-data.storage.updateObj( data.storage.getObj(['id', 'p0']), ['daone', true] )
+// display all todos, and menus
+let projectsBtn = document.getElementById('projects-btn');
+let projectsMenu = document.getElementById(('projects-menu'));
+
+let overviewBtn = document.getElementById('overview-btn');
+let overviewMenu = document.getElementById(('overview-menu'));
+
+let displayContent = document.getElementById('window-content');
+
+
+projectsBtn.addEventListener('click', dom.unfoldMenu)
+overviewBtn.addEventListener('click', dom.unfoldMenu)
+
+dom.displayAllTodos(data.storage['objs'], displayContent);
+dom.displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
+dom.displayMenuComponents(data.storage.getObjs(['done', false]), overviewMenu);
 console.log(data.storage['objs'], '<-storage[objs]');

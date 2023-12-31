@@ -31,6 +31,31 @@ const storage = {
 		}
 	},
 
+
+	getObjs([prop, value], level=this.objs, arr=[]){
+		if(Object.keys(level).length > 0){
+			// checking items at this level and look for a match
+			for(let item in level){
+				if(level[item][prop] ==  value){
+					arr.push(level[item]);
+				}
+			}
+
+			// no match made at this level
+			for(let item in level){
+				if(level[item]['type'] == 'project'){
+					return this.getObjs([prop, value], level[item], arr);
+				}
+			}
+
+			// no match made at all levels
+			return arr;
+		} else {
+			return arr;
+		}
+	},
+
+
 	uniqueAtLevel(obj){
 		// get obj level
 		let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : this.objs;

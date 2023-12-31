@@ -1,22 +1,59 @@
 import * as logic from './logic.js'
 import * as data from './data.js';
-export { displayObjs, displayObj }
+export { displayAllTodos, displayTodo, displayMenuComponents, unfoldMenu }
 
 // DISPLAY
-function displayObjs( obj, display){
-	return;
+	// TODOS
+function displayAllTodos( storage, display){
+	if(Object.keys(storage).length > 0){
+		// checking non-projects at this level to display them all!
+		for(let obj in storage){
+			if(storage[obj]['type'] !==  'project'){
+				displayTodo( storage[obj], display );
+			}
+		}
+
+		// checking projects at this storage to display and go through them
+		for(let obj in storage){
+			if(storage[obj]['type'] == 'project'){
+				return displayAllTodos( storage[obj], display );
+			}
+		}
+
+	}
 }
 
-function displayObj( obj, display ){
-	let component = createComponent(obj);
-	console.log(display, component)
-	display.appendChild(component);
+function displayTodo( obj, display ){
+	if(obj.id){
+		let component = createTodoComponent(obj);
+		display.appendChild(component);
+	}
+}
+
+
+	// MENUS
+function displayMenuComponents( projectsArr, menu ){
+	for(let project in projectsArr){
+		let projectComponent = createMenuComponent( projectsArr[project] );
+
+		// it is a main project
+		if(projectsArr[project]['project'] == ''){
+			menu.appendChild(projectComponent);
+		}
+
+		// it is a sub project
+		else {
+			let mainProject = menu.querySelector(`[data-title=${projectsArr[project]['project']}`);
+			if(mainProject){
+				console.log(mainProject, projectsArr[project]['project'], '<-<-->->');
+				mainProject.appendChild(projectComponent)
+			}
+		}
+	}
 }
 
 // COMPONENTS
-
-function createComponent(obj){
-	console.log(obj, '<-component')
+function createTodoComponent(obj){
 // for tasks
 	function _createLineItem(obj){
 		if(obj){
@@ -151,21 +188,32 @@ function createComponent(obj){
 }
 
 // allow us to create direc
-function createProject(obj){
-	//data.identifyItemAndSave(tempPro);
-	tempItem = logic.createItem(item);
+function createMenuComponent(obj){
+	if(obj){
+		let ul = document.createElement('ul');
+		let li = document.createElement('li');
+		let span = document.createElement('span');
 
+		ul.setAttribute('data-title', obj.title);
+		let dormantClass = obj.type == 'project' ? 'project-item' : 'non-project-item';
+		console.log(obj.type, dormantClass, '<--------------------')
+		li.classList.add('projects-menu-item', dormantClass);
+		span.textContent = obj.title;
 
-	if(item.project == ""){
-
-	}
-	else {
-
+		ul.appendChild(li);
+		li.appendChild(span);
+		return ul;
 	}
 }
 
-// event listeners
 
+// event listeners
+	// menus
+function unfoldMenu(e){
+	e.target.parentElement.children[1].classList.toggle('menu-unfold');
+}
+
+	// items
 function changeStatus(e){
 	let itemId = (e.target.parentElement.parentElement.id);
 	//let item = data.

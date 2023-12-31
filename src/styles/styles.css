@@ -24,6 +24,10 @@ button:active {
 	transition: 0s;
 }
 
+ul {
+	padding-left: 10px;
+}
+
 .parent-grid {
 	display: grid;
 	grid-template-columns: 1fr 4fr;
@@ -42,12 +46,12 @@ button:active {
 	height: 100%;
 }
 
-.menu-opt-cont {
+.menu-cont {
 	margin-top: 20px;
 	width: 100%;
 }
 
-.menu-btn-opt {
+.menu-btn {
 	font-size: 25px;
 	width: 70%;
 	background-color: #212A31;
@@ -55,13 +59,34 @@ button:active {
 	border-radius: 5px;
 }
 
-.menu-btn-opt:hover {
+.menu-btn:hover {
 	background-color: #313F49;
 	color: #FFF8F0;
 	border-radius: 10px;
 }
 
+/* overview menu && projects menu */
+.components-menu {
+	background-color: #1f272d;
+	width: 100%;
+	max-height: 0px;
+	overflow: hidden;
+	transition: .8s;
+}
 
+.menu-unfold {
+	max-height: 1000px;
+}
+
+.projects-menu-item {
+	list-style: none;
+	color: #656b70;
+}
+
+.project-item {
+	color: #e9e9ea;
+	cursor: pointer;
+}
 
 /*main*/
 .main-grid {
