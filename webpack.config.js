@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
 	mode: 'development',
-
+  watch: true,
   entry: {
   	index: './src/index.js',
     logic: './src/modules/logic.js',

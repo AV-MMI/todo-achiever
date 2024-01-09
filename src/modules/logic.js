@@ -7,6 +7,7 @@ class Task {
 		this.project = project.toLowerCase();
 		this.done = done;
 		this.type = 'task';
+		this.todo = true;
 	}
 }
 
@@ -26,6 +27,7 @@ class Checklist {
 		this.type = 'checklist';
 		this.done = done;
 		this.items = items;
+		this.todo = true;
 	}
 
 	addTask(task={}){
@@ -44,6 +46,7 @@ class Note {
 		this.type = 'note';
 		this.done = done;
 		this.text = text;
+		this.todo = true;
 	}
 }
 

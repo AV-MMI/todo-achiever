@@ -1,30 +1,22 @@
 import * as logic from './logic.js'
 import * as data from './data.js';
-export { displayAllTodos, displayTodo, displayMenuComponents, unfoldMenu }
+export { displayGroup, displayMenuComponents, unfoldMenu }
 
 // DISPLAY
 	// TODOS
-function displayAllTodos( storage, display){
-	if(Object.keys(storage).length > 0){
-		// checking non-projects at this level to display them all!
-		for(let obj in storage){
-			if(storage[obj]['type'] !==  'project'){
-				displayTodo( storage[obj], display );
+// takes an array of items returned by data.storage.getObjs(), and display them all in the passed display
+function displayAllTodos( objsToDisplay=[], display){
+	if(objsToDisplay.length >= 1){
+		for(let obj in objsToDisplay){
+			if(objsToDisplay[obj].todo){
+				displayTodo( objsToDisplay[obj], display );
 			}
 		}
-
-		// checking projects at this storage to display and go through them
-		for(let obj in storage){
-			if(storage[obj]['type'] == 'project'){
-				return displayAllTodos( storage[obj], display );
-			}
-		}
-
 	}
 }
 
 function displayTodo( obj, display ){
-	if(obj.id){
+	if(obj.todo){
 		let component = createTodoComponent(obj);
 		display.appendChild(component);
 	}
@@ -34,23 +26,47 @@ function displayTodo( obj, display ){
 	// MENUS
 function displayMenuComponents( projectsArr, menu ){
 	for(let project in projectsArr){
-		let projectComponent = createMenuComponent( projectsArr[project] );
-
+		let menuComponent = createMenuComponent( projectsArr[project] );
 		// it is a main project
 		if(projectsArr[project]['project'] == ''){
-			menu.appendChild(projectComponent);
+			menu.appendChild(menuComponent);
 		}
 
 		// it is a sub project
 		else {
+
 			let mainProject = menu.querySelector(`[data-title=${projectsArr[project]['project']}`);
-			if(mainProject){
-				console.log(mainProject, projectsArr[project]['project'], '<-<-->->');
-				mainProject.appendChild(projectComponent)
+			if(mainProject && menuComponent){
+				if(projectsArr[project]['type'] !== 'project'){
+					mainProject.insertBefore( menuComponent, mainProject.children[1] );
+				} else {
+					mainProject.appendChild(menuComponent)
+				}
 			}
 		}
 	}
 }
+
+	// displaying group of objs
+function displayInWindow( objsToDisplay, title, window){
+	// set window title
+	window.children[0].textContent = title;
+
+	// clean current objs
+	cleanDisplay( window.children[1] )
+	// display objs
+	displayAllTodos( objsToDisplay, window.children[1] );
+}
+
+function cleanDisplay(display){
+	if(display){
+		while(display.hasChildNodes()){
+			display.removeChild(display.firstChild)
+		}
+	}
+	return;
+}
+
 
 // COMPONENTS
 function createTodoComponent(obj){
@@ -90,7 +106,7 @@ function createTodoComponent(obj){
 
 			// assign content
 			lineCont.setAttribute('id', obj.id);
-			itemTitle.textContent = obj.title;
+			itemTitle.textContent = obj.id;
 			deleteBtn.textContent = '...';
 
 			// add corresponding eventListeners
@@ -189,16 +205,17 @@ function createTodoComponent(obj){
 
 // allow us to create direc
 function createMenuComponent(obj){
-	if(obj){
+	if(obj.type){
 		let ul = document.createElement('ul');
 		let li = document.createElement('li');
 		let span = document.createElement('span');
 
 		ul.setAttribute('data-title', obj.title);
 		let dormantClass = obj.type == 'project' ? 'project-item' : 'non-project-item';
-		console.log(obj.type, dormantClass, '<--------------------')
 		li.classList.add('projects-menu-item', dormantClass);
+		li.addEventListener('click', displayGroup);
 		span.textContent = obj.title;
+		span.setAttribute('data-project', obj.id);
 
 		ul.appendChild(li);
 		li.appendChild(span);
@@ -211,6 +228,28 @@ function createMenuComponent(obj){
 	// menus
 function unfoldMenu(e){
 	e.target.parentElement.children[1].classList.toggle('menu-unfold');
+}
+
+function displayGroup(e){
+	let projectObj = data.storage.getObj(['id', e.target.getAttribute('data-project')] || false);
+	let displayWindow = document.getElementById('display-window');
+	let projectItems;
+	if(projectObj){
+		projectItems = data.storage.getObjs(['project', projectObj.title]);
+
+	} else {
+		if(e.target.getAttribute('data-project') == 'unassigned'){
+			projectItems = data.storage.getObjs(['project', '']);
+			projectObj = {title: 'Unassigned'};
+		}
+		else if(e.target.getAttribute('data-project') == 'trash'){
+			projectItems = data.storage.getObjs(['project', 'trash'], data.storage.objs.trash);
+			projectObj = {title: 'Trash'};
+		}
+	}
+
+	displayInWindow(projectItems, projectObj.title, displayWindow)
+
 }
 
 	// items

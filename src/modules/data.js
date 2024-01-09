@@ -2,7 +2,9 @@ import * as logic from './logic.js'
 export { storage }
 
 const storage = {
-	objs: {title: 'objs',},
+	objs: {title: 'objs',
+			trash: {title: 'trash', type: 'dir'},
+	},
 	counter: 0,
 
 
@@ -20,7 +22,7 @@ const storage = {
 
 			// no match made at this level
 			for(let item in level){
-				if(level[item]['type'] == 'project'){
+				if(level[item]['type'] == 'project' ){
 					return this.getObj([prop, value], level[item]);
 				}
 			}
@@ -58,7 +60,7 @@ const storage = {
 
 	uniqueAtLevel(obj){
 		// get obj level
-		let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : this.objs;
+		let projectHost = this.getObj(['title', obj.project]);
 
 		// loop through its elements to check if there is a title conflic
 		for(let item in projectHost){
@@ -71,7 +73,7 @@ const storage = {
 	},
 
 	addObj(obj={}){
-		if(this.uniqueAtLevel(obj)){
+		if(this.uniqueAtLevel(obj) && obj.type){
 			// identify the obj with an unique id prop.
 			if(!obj.id){
 				obj.id = `${obj.type[0]}${this.counter}`;
@@ -81,19 +83,23 @@ const storage = {
 			// project == '': main || non-project: unassigned
 			if(obj.project == ''){
 				if(obj.type == 'project'){
-					this['objs'][obj.title] = obj;
+					this.objs[obj.title] = obj;
 				}
 				else {
-					this['objs'][obj.id] = obj;
+					this.objs[obj.id] = obj;
 				}
+
+				console.log('main project', obj, '<--')
 			}
 
 			// project == !'': sub || non-project: assigned
 			else {
 				// project exist
-				if(this.getObj(['title', obj.project], this.objs)){
-					let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : this.objs;
-
+				if(!this.getObj(['title', obj.project])){
+					console.log('didnt get project for', obj)
+				}
+				if(this.getObj(['title', obj.project])){
+					let projectHost = this.getObj(['title', obj.project]);
 					if(obj.type == 'project'){
 						projectHost[obj.title] = obj;
 						return;
@@ -107,7 +113,7 @@ const storage = {
 
 				// project doesnot exist
 				else {
-					let projectHost = logic.createItem(obj);
+					let projectHost = logic.createItem({'title': obj.project, 'project': '', 'done': false, 'type': 'project'});
 					this.addObj(projectHost);
 					this.addObj(obj);
 				}
@@ -157,8 +163,8 @@ const storage = {
 		}
 
 		//setting props || updating props
-		else if(obj.type && this.uniqueAtLevel(obj)){
-			if(prop !== 'id' && prop !== 'type'){
+		else if(obj.todo && this.uniqueAtLevel(obj)){
+			if(prop !== 'id' && prop !== 'type' && prop !== 'todo'){
 				// main project, or unassigned task.
 				if(obj.project == ''){
 					if(obj.type == 'project'){

@@ -26,19 +26,6 @@ let dummyProject3 = {
 	type: 'project',
 }
 
-let dummytest = {
-	title: 'test',
-	project: '',
-	done: false,
-	type: 'task',
-}
-
-let dummytest1 = {
-	title: 'pro1',
-	project: '',
-	done: false,
-	type: 'task',
-}
 
 let dummyTask1 = {
 	title: 'dTask1',
@@ -61,15 +48,17 @@ let dummyTask3 = {
 	type: 'task',
 }
 
+
 let dummyChecklist = {
 	title: 'weekly buying',
-	project: '',
+	project: 'trash',
 	done: false,
 	type: 'checklist',
 	items: [{'done': false, 'title': 'lettuce'},
 			{'done': true, 'title': 'tomato'},
 			{'done': false, 'title': 'chicken'}],
 }
+
 logic.createItem(dummyProject1);
 logic.createItem(dummyProject2);
 logic.createItem(dummyProject3);
@@ -79,26 +68,23 @@ logic.createItem(dummyTask2);
 logic.createItem(dummyTask3);
 
 
-logic.createItem(dummytest);
-logic.createItem(dummytest1);
-
 logic.createItem(dummyChecklist);
 let checkList = data.storage.getObj(['title', dummyChecklist.title]);
+console.log(data.storage.objs, '<-storage[objs]', checkList);
 
 // display all todos, and menus
+let unassignedBtn = document.getElementById('unassigned-btn');
 let projectsBtn = document.getElementById('projects-btn');
 let projectsMenu = document.getElementById(('projects-menu'));
-
+let trashBtn = document.getElementById(('trash-btn'));
 let overviewBtn = document.getElementById('overview-btn');
 let overviewMenu = document.getElementById(('overview-menu'));
 
-let displayContent = document.getElementById('window-content');
+unassignedBtn.addEventListener('click', dom.displayGroup);
+projectsBtn.addEventListener('click', dom.unfoldMenu);
+overviewBtn.addEventListener('click', dom.unfoldMenu);
+trashBtn.addEventListener('click', dom.displayGroup);
 
-
-projectsBtn.addEventListener('click', dom.unfoldMenu)
-overviewBtn.addEventListener('click', dom.unfoldMenu)
-
-dom.displayAllTodos(data.storage['objs'], displayContent);
 dom.displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
 dom.displayMenuComponents(data.storage.getObjs(['done', false]), overviewMenu);
-console.log(data.storage['objs'], '<-storage[objs]');
+console.log('hey', data.storage.getObjs(['done', false]))

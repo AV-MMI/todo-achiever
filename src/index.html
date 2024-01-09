@@ -9,16 +9,8 @@
 	<main class="center-center-flex">
 		<div class="parent-grid">
 			<div class="menu-display-grid center-center-column-flex">
-				<div class="menu-cont center-center-flex" id="today-cont">
-					<button class="menu-btn" id="today-btn">Today</button>
-				</div>
-
-				<div class="menu-cont center-center-flex" id="upcoming-cont">
-					<button class="menu-btn" id="upcoming-btn">Upcoming</button>
-				</div>
-
-				<div class="menu-cont center-center-flex" id="anytime-cont">
-					<button class="menu-btn" id="anytime-btn">Anytime</button>
+				<div class="menu-cont center-center-flex" id="unassigned-cont">
+					<button class="menu-btn" id="unassigned-btn" data-project='unassigned'>Unassigned</button>
 				</div>
 
 				<div class="menu-cont v-c-flex" id="overview-cont">
@@ -32,7 +24,7 @@
 				</div>
 
 				<div class="menu-cont center-center-flex" id="trash-cont">
-					<button class="menu-btn" id="trash-btn">Trash</button>
+					<button class="menu-btn" id="trash-btn" data-project="trash" data-title='Trash'>Trash</button>
 				</div>
 			</div>
 
@@ -70,7 +62,7 @@
 				</div>
 
 				<div class="display-window vertical-flex" id="display-window">
-					<div class="window-top-cont"><span class="window-title"></span></div>
+					<div class="window-top center-center-flex"><h1 class="window-title"></span></div>
 					<div class="window-content" id='window-content'></div>
 				</div>
 			</div>
