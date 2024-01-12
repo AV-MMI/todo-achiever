@@ -1,5 +1,5 @@
 import * as logic from './logic.js'
-export { storage }
+export { storage, userSetting }
 
 const storage = {
 	objs: {title: 'objs',
@@ -89,15 +89,11 @@ const storage = {
 					this.objs[obj.id] = obj;
 				}
 
-				console.log('main project', obj, '<--')
 			}
 
 			// project == !'': sub || non-project: assigned
 			else {
 				// project exist
-				if(!this.getObj(['title', obj.project])){
-					console.log('didnt get project for', obj)
-				}
 				if(this.getObj(['title', obj.project])){
 					let projectHost = this.getObj(['title', obj.project]);
 					if(obj.type == 'project'){
@@ -191,4 +187,37 @@ const storage = {
 		}
 	},
 
+}
+
+const userSetting = {
+	remove: {
+		partial: true,
+		complete: false,
+	},
+	storage: {
+		none: true,
+		local: false,
+	},
+
+	toggleDeleteVals(){
+		if(this.delete.partial){
+			this.delete.complete = true;
+			this.delete.partial = false;
+		} else {
+			this.delete.complete = false;
+			this.delete.partial = true;
+		}
+	},
+
+	useStorage( sto ){
+		if(sto){
+			for(let typeSto in this.storage){
+				if(typeSto == sto){
+					this.storage[typeSto] = true;
+				} else {
+					this.storage[typeSto] = false;
+				}
+			}
+		}
+	}
 }

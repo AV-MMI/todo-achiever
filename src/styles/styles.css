@@ -78,7 +78,7 @@ ul {
 	max-height: 1000px;
 }
 
-.projects-menu-item {
+.menu-item {
 	list-style: none;
 	color: #656b70;
 }
@@ -86,6 +86,10 @@ ul {
 .project-item {
 	color: #e9e9ea;
 	cursor: pointer;
+}
+
+.done-item {
+	color: #597E52;
 }
 
 /*main*/

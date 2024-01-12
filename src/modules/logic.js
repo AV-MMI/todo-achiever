@@ -17,6 +17,7 @@ class Project {
 		this.project = project.toLowerCase();
 		this.done = done;
 		this.type = 'project';
+		this.todo = true;
 	}
 }
 

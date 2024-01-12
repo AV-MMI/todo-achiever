@@ -51,8 +51,8 @@ let dummyTask3 = {
 
 let dummyChecklist = {
 	title: 'weekly buying',
-	project: 'trash',
-	done: false,
+	project: 'pro2',
+	done: true,
 	type: 'checklist',
 	items: [{'done': false, 'title': 'lettuce'},
 			{'done': true, 'title': 'tomato'},
@@ -70,21 +70,25 @@ logic.createItem(dummyTask3);
 
 logic.createItem(dummyChecklist);
 let checkList = data.storage.getObj(['title', dummyChecklist.title]);
-console.log(data.storage.objs, '<-storage[objs]', checkList);
+console.log(data.storage.objs, '<-storage[objs]', data.storage.getObjs(['type', true]));
 
 // display all todos, and menus
 let unassignedBtn = document.getElementById('unassigned-btn');
+let completedBtn = document.getElementById('completed-btn');
 let projectsBtn = document.getElementById('projects-btn');
-let projectsMenu = document.getElementById(('projects-menu'));
+let projectsMenu = document.getElementById('projects-menu');
 let trashBtn = document.getElementById(('trash-btn'));
 let overviewBtn = document.getElementById('overview-btn');
-let overviewMenu = document.getElementById(('overview-menu'));
+let overviewMenu = document.getElementById('overview-menu');
+
+let displayWindow = document.getElementById('window-content');
 
 unassignedBtn.addEventListener('click', dom.displayGroup);
+completedBtn.addEventListener('click', dom.displayGroup);
 projectsBtn.addEventListener('click', dom.unfoldMenu);
 overviewBtn.addEventListener('click', dom.unfoldMenu);
 trashBtn.addEventListener('click', dom.displayGroup);
 
 dom.displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
-dom.displayMenuComponents(data.storage.getObjs(['done', false]), overviewMenu);
-console.log('hey', data.storage.getObjs(['done', false]))
+dom.displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+dom.displayAllTodos(data.storage.getObjs(['done', false]), displayWindow);

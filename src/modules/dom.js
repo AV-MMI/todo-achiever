@@ -1,6 +1,6 @@
 import * as logic from './logic.js'
 import * as data from './data.js';
-export { displayGroup, displayMenuComponents, unfoldMenu }
+export { displayGroup, displayMenuComponents, unfoldMenu, displayAllTodos }
 
 // DISPLAY
 	// TODOS
@@ -16,7 +16,7 @@ function displayAllTodos( objsToDisplay=[], display){
 }
 
 function displayTodo( obj, display ){
-	if(obj.todo){
+	if(obj.todo && obj.type !== 'project'){
 		let component = createTodoComponent(obj);
 		display.appendChild(component);
 	}
@@ -82,8 +82,8 @@ function createTodoComponent(obj){
 			let titleCont = document.createElement('div');
 			let itemTitle = document.createElement('span');
 
-			let deleteCont = document.createElement('div');
-			let deleteBtn = document.createElement('button');
+			let optionsCont = document.createElement('div');
+			let optionsBtn = document.createElement('button');
 
 			// assign classes
 			if(obj.type == 'project'){
@@ -95,34 +95,45 @@ function createTodoComponent(obj){
 			checkCont.classList.add('check-cont', 'c-c-flex');
 
 				// get what class should we use depending on the state of the item.status
-			let statusClass = obj.done ? 'check-btn-done' : 'noclass';
+			if(obj.done){
+				checkBtn.classList.add('check-btn-done');
+				titleCont.classList.add('cross-title');
+				if(obj.type !== 'note' && obj.type !== 'checklist'){
+					lineCont.classList.add('opacity-done')
+				}
+			}
 
-			checkBtn.classList.add('check-btn', statusClass);
+			checkBtn.classList.add('check-btn');
 
 			titleCont.classList.add('title-cont', 'c-c-flex');
 
-			deleteCont.classList.add('delete-cont', 'c-c-flex');
-			deleteBtn.classList.add('delete-btn');
+			optionsCont.classList.add('options-cont', 'c-c-flex');
+			optionsBtn.classList.add('options-btn');
 
-			// assign content
+			// assign id and attributes
 			lineCont.setAttribute('id', obj.id);
+			lineCont.setAttribute('type', obj.type);
+			// in case our item is in a directory
+			if(obj.project == 'trash'){
+				lineCont.setAttribute('directory', obj.project);
+			}
 			itemTitle.textContent = obj.id;
-			deleteBtn.textContent = '...';
+			optionsBtn.textContent = '...';
 
 			// add corresponding eventListeners
 			checkBtn.addEventListener('click', changeStatus);
-			deleteBtn.addEventListener('click', deleteItem);
+			optionsBtn.addEventListener('click', deleteItem);
 
 			// append elements
 			lineCont.appendChild(checkCont);
 			lineCont.appendChild(titleCont);
-			lineCont.appendChild(deleteCont);
+			lineCont.appendChild(optionsCont);
 
 			checkCont.appendChild(checkBtn);
 
 			titleCont.appendChild(itemTitle);
 
-			deleteCont.appendChild(deleteBtn);
+			optionsCont.appendChild(optionsBtn);
 
 			return lineCont;
 		}
@@ -174,10 +185,15 @@ function createTodoComponent(obj){
 				bottomCont.classList.add('checklist-item');
 			}
 
-			// assign id to the wrapper
-			recWrapper.setAttribute('id', obj.id)
+			// assign id and attributes to the wrapper
+			recWrapper.setAttribute('id', obj.id);
+			recWrapper.setAttribute('type', obj.type);
 
 			// assign classes
+			if(obj.done){
+				recWrapper.classList.add('opacity-done')
+
+			}
 			recWrapper.classList.add('rec-wrapper', 'item');
 			bottomCont.classList.add('rec-bottom');
 
@@ -211,8 +227,9 @@ function createMenuComponent(obj){
 		let span = document.createElement('span');
 
 		ul.setAttribute('data-title', obj.title);
-		let dormantClass = obj.type == 'project' ? 'project-item' : 'non-project-item';
-		li.classList.add('projects-menu-item', dormantClass);
+		let projectItemClass = obj.type == 'project' ? 'project-item' : 'non-project-item';
+		let doneItemClass = obj.done ? 'done-item' : 'non-done-item';
+		li.classList.add('menu-item', projectItemClass, doneItemClass);
 		li.addEventListener('click', displayGroup);
 		span.textContent = obj.title;
 		span.setAttribute('data-project', obj.id);
@@ -231,10 +248,10 @@ function unfoldMenu(e){
 }
 
 function displayGroup(e){
-	let projectObj = data.storage.getObj(['id', e.target.getAttribute('data-project')] || false);
+	let projectObj = data.storage.getObj(['id', e.target.getAttribute('data-project')]);
 	let displayWindow = document.getElementById('display-window');
 	let projectItems;
-	if(projectObj){
+	if(projectObj !== undefined){
 		projectItems = data.storage.getObjs(['project', projectObj.title]);
 
 	} else {
@@ -246,6 +263,10 @@ function displayGroup(e){
 			projectItems = data.storage.getObjs(['project', 'trash'], data.storage.objs.trash);
 			projectObj = {title: 'Trash'};
 		}
+		else if(e.target.getAttribute('data-project') == 'completed'){
+			projectItems = data.storage.getObjs(['done', true], data.storage.objs);
+			projectObj = {title: 'Completed'};
+		}
 	}
 
 	displayInWindow(projectItems, projectObj.title, displayWindow)
@@ -254,8 +275,38 @@ function displayGroup(e){
 
 	// items
 function changeStatus(e){
-	let itemId = (e.target.parentElement.parentElement.id);
-	//let item = data.
+	let overviewMenu = document.getElementById('overview-menu');
+	let component = e.target.parentElement.parentElement
+	let directory = component.getAttribute('directory');
+	let obj;
+
+	if(directory){
+		obj = data.storage.getObj(['id', component.getAttribute('id')], data.storage.objs[directory]);
+	} else {
+		obj = data.storage.getObj(['id', component.getAttribute('id')]);
+	}
+
+
+	if(component.getAttribute('type') == 'note' || component.getAttribute('type') == 'checklist'){
+		component = component.parentElement;
+		if(obj){
+			component.children[0].children[0].children[0].classList.toggle('check-btn-done');
+			component.children[0].children[1].classList.toggle('cross-title');
+			component.classList.toggle('opacity-done');
+			obj.done = obj.done == true ? false : true;
+		}
+
+	} else {
+		if(obj){
+			component.children[0].children[0].classList.toggle('check-btn-done');
+			component.children[1].classList.toggle('cross-title');
+			component.classList.toggle('opacity-done');
+			obj.done = obj.done == true ? false : true;
+		}
+	}
+	
+	cleanDisplay(overviewMenu)
+	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 }
 
 function deleteItem(e){
