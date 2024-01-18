@@ -92,3 +92,5 @@ trashBtn.addEventListener('click', dom.displayGroup);
 dom.displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
 dom.displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 dom.displayAllTodos(data.storage.getObjs(['done', false]), displayWindow);
+
+let testObj = data.storage.getObj(['title', 'pro1']);

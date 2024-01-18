@@ -50,6 +50,7 @@ button {
   grid-template-rows: 1fr;
   min-height: 25px;
   border: 2px solid black;
+  position: relative;
 }
 
 /*general elements of items*/
@@ -97,7 +98,51 @@ button {
 }
 
 .options-btn:hover {
-	color: red;
+	/color: red;
+}
+
+.obj-menu-opt {
+	margin-bottom: 10px;
+	transition: 0.5s;
+	text-decoration: none;
+}
+
+.obj-menu-opt:hover {
+	color: black;
+	text-decoration: underline;
+}
+
+.menu-div {
+	position: relative;
+}
+
+.obj-menu {
+	padding: 0px 10px;
+	background-color: #fbf9f1;
+	border: 2px solid #e5e1da;
+	width: min-content;
+	height: min-content;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	color: #3d3b40;
+	position: absolute;
+	top: 25px;
+	z-index: 222;
+}
+
+.select-project {
+	width: 100%;
+}
+
+.update-btn {
+	border-radius: 10px;
+	border: 1px solid black;
+	transition: 0.4s;
+}
+
+.update-btn:active {
+	border: 1px solid orange;
 }
 
 
@@ -131,3 +176,4 @@ button {
 .task-wrapper > button {
 	margin-right: 15px;
 }
+

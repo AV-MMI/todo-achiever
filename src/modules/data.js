@@ -9,7 +9,7 @@ const storage = {
 
 
 	getObj([prop, value], level=this.objs){
-		if(Object.keys(level).length > 0){
+		if(Object.keys(level).length > 0 && prop && value){
 			if(prop == 'title' && value == ''){
 				return this.objs;
 			}
@@ -119,20 +119,20 @@ const storage = {
 		}
 	},
 
-	removeObj(obj={}){
+	removeObj(obj={}, storage=this.objs){
 		// main project, or unassigned task.
 		if(obj.project == ''){
 			if(obj.type == 'project'){
-				delete this.objs[obj.title];
+				delete storage[obj.title];
 			}
 			else {
-				delete this.objs[obj.id];
+				delete storage[obj.id];
 			}
 		}
 		// inside a project
 		else {
-			let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : this.objs;
-
+			let projectHost = this.getObj(['title', obj.project]);
+			console.log(projectHost, obj.project, 'projectHost')
 			if(obj.type == 'project'){
 				delete projectHost[obj.title];
 			}
@@ -164,15 +164,15 @@ const storage = {
 				// main project, or unassigned task.
 				if(obj.project == ''){
 					if(obj.type == 'project'){
-						this.objs[obj.title][prop] = value;
+						storage[obj.title][prop] = value;
 					}
 					else {
-						this.objs[obj.id][prop] = value;
+						storage[obj.id][prop] = value;
 					}
 				}
 				// inside a project
 				else {
-					let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : this.objs;
+					let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : storage;
 
 					if(obj.type == 'project'){
 						projectHost[obj.title][prop] = value;
