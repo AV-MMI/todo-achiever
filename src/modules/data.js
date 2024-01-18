@@ -6,7 +6,16 @@ const storage = {
 			trash: {title: 'trash', type: 'dir'},
 	},
 	counter: 0,
-
+	userSetting: {
+		delete: {
+			partial: true,
+			complete: false,
+		},
+		storage: {
+			none: true,
+			local: false,
+		}
+	},
 
 	getObj([prop, value], level=this.objs){
 		if(Object.keys(level).length > 0 && prop && value){

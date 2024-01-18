@@ -356,7 +356,6 @@ function itemOptions(e){
 	return;
 }
 
-
 // Handler for objs components menu: delete, update, complete
 function objMenuHandler(e){
 	let overviewMenu = document.getElementById('overview-menu');
@@ -364,6 +363,10 @@ function objMenuHandler(e){
 	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]);
 	if(e.target.getAttribute('data-opt') == 'delete'){
 		_handleDelete(e);
+
+		// update overview menu
+		cleanDisplay(overviewMenu)
+		displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 	}
 	else if(e.target.getAttribute('data-opt') == 'update'){
 		function _createUlUpdateMenu(obj){
@@ -432,12 +435,11 @@ function objMenuHandler(e){
 		// delete menu and redisplay!
 		lineComponent.children[2].children[0].click();
 		lineComponent.children[2].children[0].click();
-		return;
-	}
 
 		// update overview menu
-	cleanDisplay(overviewMenu)
-	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+		cleanDisplay(overviewMenu)
+		displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+	}
 }
 
 	// Handler for Delete
@@ -463,26 +465,42 @@ function _handleUpdate(e){
 
 	let inputTitle = ul.querySelector('#title-input');
 	let selectEl = ul.querySelector('#select-project');
+	let objCopy = JSON.parse(JSON.stringify(obj));
+	let overviewMenu = document.getElementById('overview-menu');
 
 	if(inputTitle.value !== obj.title){
 		let itemTitle = lineCont.querySelector(`#title-${obj.id}`);
 		itemTitle.textContent = inputTitle.value;
-		obj.title = inputTitle.value;
+
+		objCopy.title = inputTitle.value;
+		data.storage.removeObj(obj);
+		data.storage.addObj(objCopy);
 	}
 
 	if(selectEl.value !== obj.project){
-		obj.project = selectEl.value;
+		objCopy.project = selectEl.value;
 
-		if(lineCont.getAttribute('type') == 'task'){
-			lineCont.remove();
-		}
+		data.storage.removeObj(obj);
+		if(data.storage.uniqueAtLevel(objCopy)){
+			if(lineCont.getAttribute('type') == 'task'){
+				lineCont.remove();
+			}
 
-		else if(lineCont.getAttribute('type') == 'note' || lineCont.getAttribute('type') == 'checklist'){
-			let recWrap = lineCont.parentElement;
-			recWrap.remove();
+			else if(lineCont.getAttribute('type') == 'note' || lineCont.getAttribute('type') == 'checklist'){
+				let recWrap = lineCont.parentElement;
+				recWrap.remove();
+			}
+
+			data.storage.addObj(objCopy);
+
+		} else {
+			alert('there is another item with that title in the selected project');
 		}
 	}
 
 	// close menu
 	optionsBtn.click();
+	// update overview menu
+	cleanDisplay(overviewMenu)
+	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 }
