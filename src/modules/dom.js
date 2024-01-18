@@ -220,7 +220,7 @@ function createTodoComponent(obj){
 	}
 }
 
-// allow us to create direc
+// allow us to create directories for directories/projects/overview menu
 function createMenuComponent(obj){
 	if(obj.type){
 		let ul = document.createElement('ul');
@@ -241,17 +241,29 @@ function createMenuComponent(obj){
 	}
 }
 
+function createBasicMenu(obj={}){
+	let menuWrap = document.createElement('div');
+	let ul = document.createElement('ul');
+
+	menuWrap.classList.add('obj-menu');
+	if(obj.id){
+		menuWrap.setAttribute('id', obj.id);
+	}
+
+	ul.classList.add('ul-menu')
+
+	menuWrap.appendChild(ul);
+	return menuWrap;
+}
 
 // allow us to create a menu component for each passed obj
 function createObjMenu(obj){
-	let menuWrap = document.createElement('div');
-	let ul = document.createElement('ul');
+	let basicMenu = createBasicMenu(obj);
+	let ul = basicMenu.querySelector('.ul-menu');
 	let liDelete = document.createElement('li');
 	let liUpdate = document.createElement('li');
 	let liComplete = document.createElement('li');
 
-	menuWrap.classList.add('obj-menu');
-	menuWrap.setAttribute('id', obj.id);
 	[liDelete, liUpdate, liComplete].forEach((li) => li.classList.add('obj-menu-opt'));
 	liDelete.setAttribute('data-opt', 'delete');
 	liUpdate.setAttribute('data-opt', 'update');
@@ -264,10 +276,28 @@ function createObjMenu(obj){
 	[liDelete, liUpdate, liComplete].forEach((li) => ul.appendChild(li));
 	[liDelete, liUpdate, liComplete].forEach((li) => li.addEventListener('click', objMenuHandler));
 
-	menuWrap.appendChild(ul);
 
-	return menuWrap;
+
+	return basicMenu;
 }
+
+// menu for user preferences
+function createUserPrefMenu(){
+	let basicMenu = createBasicMenu();
+	let liRemove = document.createElement('li');
+	let removeLabel = document.createElement('label');
+	let removeSelect = document.createElement('select');
+	let partialOpt = document.createElement('option');
+	let completeOpt = document.createElement('option');
+
+	let liStorage = document.createElement('li');
+	let storageLabel = document.createElement('label');
+	let storageSelect = document.createElement('select');
+	let localOpt = document.createElement('option');
+	let noneOpt = document.createElement('option');
+}
+
+// menu for creating obj components
 
 // event listeners
 	// menus
@@ -284,7 +314,7 @@ function displayGroup(e){
 
 	} else {
 		if(e.target.getAttribute('data-project') == 'unassigned'){
-			projectItems = data.storage.getObjs(['project', '']);
+			projectItems = data.storage.getObjs(['project', ''], data.storage.objs);
 			projectObj = {title: 'Unassigned'};
 		}
 		else if(e.target.getAttribute('data-project') == 'trash'){
@@ -297,8 +327,7 @@ function displayGroup(e){
 		}
 	}
 
-	displayInWindow(projectItems, projectObj.title, displayWindow)
-
+	displayInWindow(projectItems, projectObj.title, displayWindow);
 }
 
 	// items
@@ -403,8 +432,9 @@ function objMenuHandler(e){
 			// get projects to make each option
 			let projects = data.storage.getObjs(['type', 'project']);
 			if(projects){
+				let proOpt;
 				projects.forEach((project) => {
-					let proOpt = document.createElement('option');
+					proOpt = document.createElement('option');
 					proOpt.value=`${project.title}`;
 					proOpt.textContent = `${project.title}`;
 
@@ -412,8 +442,17 @@ function objMenuHandler(e){
 						proOpt.setAttribute('selected', true);
 					}
 					selectEl.appendChild(proOpt);
-				})
+				});
+				proOpt = document.createElement('option');
+				proOpt.value=`${''}`;
+				proOpt.textContent = 'unassigned';
+				if(proOpt.value == obj.project){
+					proOpt.setAttribute('selected', true);
+				}
+				selectEl.appendChild(proOpt);
 			}
+
+
 
 			[selectLabel, selectEl].forEach((select) => liSelect.appendChild(select));
 			liTitle.appendChild(titleInput);
@@ -457,6 +496,7 @@ function _handleDelete(e){
 }
 
 	// Handlers for update, objs menu
+
 function _handleUpdate(e){
 	let ul = e.target.parentElement.parentElement;
 	let lineCont = ul.parentElement.parentElement.parentElement;

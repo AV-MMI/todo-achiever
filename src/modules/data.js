@@ -6,16 +6,6 @@ const storage = {
 			trash: {title: 'trash', type: 'dir'},
 	},
 	counter: 0,
-	userSetting: {
-		delete: {
-			partial: true,
-			complete: false,
-		},
-		storage: {
-			none: true,
-			local: false,
-		}
-	},
 
 	getObj([prop, value], level=this.objs){
 		if(Object.keys(level).length > 0 && prop && value){
@@ -69,7 +59,7 @@ const storage = {
 
 	uniqueAtLevel(obj){
 		// get obj level
-		let projectHost = this.getObj(['title', obj.project]);
+		let projectHost = this.getObj(['title', obj.project]) || this.objs;
 
 		// loop through its elements to check if there is a title conflic
 		for(let item in projectHost){
@@ -152,54 +142,11 @@ const storage = {
 		return;
 	},
 
-	updateObj(obj={}, [prop, value]){
-		//special cases: when a change in an obj's property requires re-add the obj
-			// projects: title, project && non-projects: project
-		if(obj.type == 'project' && prop == 'title' || obj.type == 'project' && prop == 'project' ||
-			obj.type !== 'project' && prop == 'project'){
-			let tempObj = Object.create(Object.getPrototypeOf(obj));
-			Object.assign(tempObj, obj);
-			tempObj[prop] = value;
-
-			if(this.uniqueAtlevel(tempObj)){
-				this.removeObj(obj);
-				this.addObj(tempObj);
-			}
-		}
-
-		//setting props || updating props
-		else if(obj.todo && this.uniqueAtLevel(obj)){
-			if(prop !== 'id' && prop !== 'type' && prop !== 'todo'){
-				// main project, or unassigned task.
-				if(obj.project == ''){
-					if(obj.type == 'project'){
-						storage[obj.title][prop] = value;
-					}
-					else {
-						storage[obj.id][prop] = value;
-					}
-				}
-				// inside a project
-				else {
-					let projectHost = this.getObj(['title', obj.project]) ? this.getObj(['title', obj.project]) : storage;
-
-					if(obj.type == 'project'){
-						projectHost[obj.title][prop] = value;
-					}
-					else {
-						projectHost[obj.id][prop] = value;
-					}
-
-				}
-				return;
-			}
-		}
-	},
 
 }
 
 const userSetting = {
-	remove: {
+	delete: {
 		partial: true,
 		complete: false,
 	},
