@@ -1,6 +1,7 @@
 button {
 	background-color: none;
-}
+};15
+
 
 .v-flex {
 	display: flex;
@@ -30,7 +31,9 @@ button {
 	justify-content: left;
 }
 
-
+.no-margin {
+	margin: 0px !important;
+}
 /* general style for item*/
 .line-item-grid {
 	display: grid;
@@ -40,7 +43,7 @@ button {
 
 .item {
 	max-width: 350px;
-	margin: 20px;
+	margin-bottom: 20px;
 }
 
 .line-container {
@@ -49,11 +52,35 @@ button {
   grid-template-columns: 1fr 4fr 1fr;
   grid-template-rows: 1fr;
   min-height: 25px;
+  max-width: 350px;
+  min-width: 346px;
   border: 2px solid black;
   position: relative;
 }
 
 /*general elements of items*/
+
+.deleted-item {
+	width: max-content;
+	margin-bottom: 10px;
+}
+
+.restore-btn {
+	min-width: 150px;
+	max-width: 150px;
+	border-left: 2px solid black;
+	border-top: 2px solid black;
+	border-right: 2px solid black;
+	height: 20px;
+	font-size: 14px;
+	background-color: #2b7dbf;
+	color: white;
+	transition: 0.5s;
+}
+
+.restore-btn:hover {
+	background-color: #39A7FF;
+}
 .check-btn {
 	height: 15px;
 	width: 15px;
@@ -131,8 +158,9 @@ button {
 	z-index: 222;
 }
 
-.select-project {
+.select {
 	width: 100%;
+	margin-bottom: 10px;
 }
 
 .update-btn {
@@ -145,11 +173,34 @@ button {
 	border: 1px solid orange;
 }
 
+/*user preferences*/
+.set-btn {
+	border: 2px solid purple;
+}
+
+.wrapper-alert {
+	position: absolute;
+}
+
+.background-alert {
+	width: 100vw;
+	height: 100vh;
+	background: rgb(0 0 0 / 0.6);
+	position: relative;
+}
+
+.central-window-alert {
+	position: absolute;
+	top: 20%;
+	left: 50%;
+}
 
 /*Specific  to type/kind of item*/
 .rec-wrapper {
-	background-color: blue;
 	height: auto;
+	min-width: max-content;
+	display: flex;
+	flex-direction: column;
 }
 
 .rec-wrapper > .item {
@@ -158,14 +209,15 @@ button {
 
 .rec-bottom {
 	height: auto;
-	width: inherit;
 	background-color: #FDF7E4;
 	border-left: 2px solid black;
 	border-right: 2px solid black;
 	border-bottom: 2px solid black;
 	padding: 10px;
 	padding-left: 20px;
-	word-wrap: break-word
+	word-wrap: break-word;
+	width: auto;
+	max-width: inherit;
 }
 
 	/*checklist*/

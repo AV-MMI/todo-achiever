@@ -1,6 +1,6 @@
 import * as logic from './logic.js'
 import * as data from './data.js';
-export { displayGroup, displayMenuComponents, unfoldMenu, displayAllTodos, createObjMenu}
+export { displayGroup, displayMenuComponents, unfoldMenu, displayAllTodos, createObjMenu, handleUserPref}
 
 // DISPLAY
 	// TODOS
@@ -94,15 +94,6 @@ function createTodoComponent(obj){
 
 			checkCont.classList.add('check-cont', 'c-c-flex');
 
-				// get what class should we use depending on the state of the item.status
-			if(obj.done){
-				checkBtn.classList.add('check-btn-done');
-				titleCont.classList.add('cross-title');
-				if(obj.type !== 'note' && obj.type !== 'checklist'){
-					lineCont.classList.add('opacity-done')
-				}
-			}
-
 			checkBtn.classList.add('check-btn');
 
 			titleCont.classList.add('title-cont', 'c-c-flex');
@@ -136,6 +127,37 @@ function createTodoComponent(obj){
 
 			optionsCont.appendChild(optionsBtn);
 
+			// if obj was deleted and deletion is partial
+			if(obj.previousProject && data.userSetting.getDeleteVal() == 'partial'){
+				let wrapper = document.createElement('div');
+				let restoreBtn = document.createElement('button');
+
+				wrapper.classList.add('deleted-item', 'v-flex');
+				if(obj.type !== 'note' && obj.type !== 'checklist'){
+					wrapper.classList.add('opacity-done');
+				} else {
+					wrapper.classList.add('no-margin');
+				}
+				restoreBtn.textContent = 'restore';
+				restoreBtn.classList.add('restore-btn', 'c-c-flex');
+				restoreBtn.addEventListener('click', handleRestore);
+
+				lineCont.classList.add('no-margin');
+
+				wrapper.appendChild(restoreBtn);
+				wrapper.appendChild(lineCont);
+
+				return wrapper;
+			}
+
+			// if delete is complete then there is no need to add restore obj
+			if(obj.done){
+				checkBtn.classList.add('check-btn-done');
+				titleCont.classList.add('cross-title');
+				if(obj.type !== 'note' && obj.type !== 'checklist'){
+					lineCont.classList.add('opacity-done')
+				}
+			}
 			return lineCont;
 		}
 	}
@@ -146,6 +168,11 @@ function createTodoComponent(obj){
 			// create elements
 			let recWrapper = document.createElement('div');
 			let headCont = _createLineItem(obj);
+			if(obj.previousProject && data.userSetting.getDeleteVal() == 'none'){
+				headCont.classList.add('no-margin');
+				headCont.classList.remove('opacity-done');
+			}
+			console.log(obj.previousProject == true,headCont, 'testo')
 				// bottom
 			let bottomCont = document.createElement('div');
 			if(obj.type == 'note'){
@@ -282,8 +309,9 @@ function createObjMenu(obj){
 }
 
 // menu for user preferences
-function createUserPrefMenu(){
+function createUserPrefMenu(obj=data.userSetting){
 	let basicMenu = createBasicMenu();
+	let ul = basicMenu.getElementsByClassName('ul-menu')[0];
 	let liRemove = document.createElement('li');
 	let removeLabel = document.createElement('label');
 	let removeSelect = document.createElement('select');
@@ -295,15 +323,84 @@ function createUserPrefMenu(){
 	let storageSelect = document.createElement('select');
 	let localOpt = document.createElement('option');
 	let noneOpt = document.createElement('option');
+
+	let liSetBtn = document.createElement('li');
+	let setBtn = document.createElement('button');
+
+	// remove
+	removeLabel.textContent = 'remove';
+	partialOpt.value = 'partial';
+	partialOpt.textContent = 'partial';
+
+	completeOpt.value = 'complete';
+	completeOpt.textContent = 'complete';
+
+	// storage
+	storageLabel.textContent = 'storage';
+	localOpt.value = 'local';
+	localOpt.textContent = 'local';
+
+	noneOpt.value = 'none';
+	noneOpt.textContent = 'none';
+
+	[localOpt, noneOpt].forEach( (opt) => { if(obj.storage[obj.value]){ opt.setAttribute('selected', true) } });
+
+	// set btn
+	setBtn.classList.add('set-btn');
+	setBtn.textContent = 'set preferences';
+
+	[liRemove, liStorage, liSetBtn].forEach( (opt) => { opt.classList.add('menu-item') });
+	[removeSelect, storageSelect].forEach( (select) => { select.classList.add('select') });
+	removeLabel.setAttribute('for', 'remove-select');
+	removeSelect.setAttribute('id', 'remove-select');
+
+	storageLabel.setAttribute('for', 'storage-select');
+	storageSelect.setAttribute('id', 'storage-select');
+
+	basicMenu.appendChild(ul);
+	ul.appendChild(liRemove);
+	ul.appendChild(liStorage);
+	ul.appendChild(liSetBtn);
+
+	liRemove.appendChild(removeLabel);
+	liRemove.appendChild(removeSelect);
+	removeSelect.appendChild(partialOpt);
+	removeSelect.appendChild(completeOpt);
+
+	liStorage.appendChild(storageLabel);
+	liStorage.appendChild(storageSelect);
+	storageSelect.appendChild(localOpt);
+	storageSelect.appendChild(noneOpt);
+
+	liSetBtn.appendChild(setBtn);
+
+	setBtn.addEventListener('click', setPrefValues);
+
+	return basicMenu
 }
 
-// menu for creating obj components
+function createCentralWindowAlert(){
+	let wrapper = document.createElement('div');
+	let background = document.createElement('div');
+	let divWindow = document.createElement('div');
+
+	wrapper.classList.add('wrapper-alert');
+	background.classList.add('background-alert');
+	divWindow.classList.add('central-window-alert');
+
+	wrapper.appendChild(background);
+	wrapper.appendChild(divWindow);
+
+	background.addEventListener('click', closeAlert);
+	return wrapper;
+}
 
 // event listeners
 	// menus
 function unfoldMenu(e){
 	e.target.parentElement.children[1].classList.toggle('menu-unfold');
 }
+
 
 function displayGroup(e){
 	let projectObj = data.storage.getObj(['id', e.target.getAttribute('data-project')]);
@@ -367,21 +464,31 @@ function changeStatus(e){
 	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 }
 
+/*
+ EVENT HANDLER
+ In charge of the process of displaying and removing the item options menu for each project.
+*/
+
 function itemOptions(e){
 	let buttonTarget = e.target;
 	let lineComponent = e.target.parentElement.parentElement;
 	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]);
 	let menuAppended = lineComponent.getElementsByClassName('obj-menu');
 
+	// if obj is valid it means that it come from projects and not from trash
+	if(!obj){
+		obj = data.storage.getObj(['id', lineComponent.getAttribute('id')], data.storage.objs[lineComponent.getAttribute('directory')]);
+		console.log('aja')
+	}
+	// menu has not been opened, son open it !
 	if(obj && menuAppended.length == 0){
-		let menuDiv = document.createElement('div');
 		let objMenu = createObjMenu(obj);
 		lineComponent.lastChild.appendChild(objMenu);
-
-	} else {
+ 	} else {
 		menuAppended = lineComponent.getElementsByClassName('obj-menu');
 		menuAppended[0].remove();
 	}
+
 	return;
 }
 
@@ -420,7 +527,7 @@ function objMenuHandler(e){
 			selectLabel.textContent = 'select new project';
 			selectLabel.setAttribute('for', 'select-project');
 
-			selectEl.classList.add('select-project')
+			selectEl.classList.add('select')
 			selectEl.setAttribute('id', 'select-project');
 
 			updateBtn.textContent = 'update obj';
@@ -484,7 +591,7 @@ function objMenuHandler(e){
 	// Handler for Delete
 function _handleDelete(e){
 	let lineCont = e.target.parentElement.parentElement.parentElement.parentElement;
-	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]);
+	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]) || data.storage.getObj(['id', lineCont.getAttribute('id')], data.storage.objs[lineCont.getAttribute('directory')]);
 
 	if(lineCont.getAttribute('type') == 'note' || lineCont.getAttribute('type') == 'checklist'){
 		lineCont.parentElement.remove();
@@ -492,11 +599,35 @@ function _handleDelete(e){
 		lineCont.remove();
 	}
 
-	data.storage.removeObj(obj);
+	// delete process is partial
+	if(data.userSetting.getDeleteVal() == 'partial'){
+		let objClone = JSON.parse(JSON.stringify(obj));
+		// our obj is currently out of trash
+		if(obj.project !== 'trash'){
+			objClone.previousProject = obj.project;
+			objClone.project = 'trash';
+
+			// remove previous obj referece and add current one.
+			data.storage.removeObj(obj);
+			data.storage.addObj(objClone);
+			console.log('asdasd jude', data.storage.objs);
+		}
+		// our project is already in trash: complete deletion;
+		else {
+			data.storage.removeObj(objClone, data.storage.objs['trash']);
+			console.log('te mata por plata mi pana', data.storage.objs);
+		}
+	}
+
+	// delete process is complete: just remove directly.
+	else {
+		data.storage.removeObj(obj);
+	}
 }
 
 	// Handlers for update, objs menu
 
+	// Handler for update
 function _handleUpdate(e){
 	let ul = e.target.parentElement.parentElement;
 	let lineCont = ul.parentElement.parentElement.parentElement;
@@ -543,4 +674,42 @@ function _handleUpdate(e){
 	// update overview menu
 	cleanDisplay(overviewMenu)
 	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+}
+
+// handler for user preference
+function handleUserPref(e){
+	let alert = createCentralWindowAlert();
+	let centralWindow = alert.getElementsByClassName('central-window-alert')[0];
+	let background = alert.getElementsByClassName('background-alert')[0]
+	let userPrefMenu = createUserPrefMenu();
+
+	centralWindow.appendChild(userPrefMenu);
+	let main = document.getElementsByTagName('main')[0];
+	main.appendChild(alert);
+}
+
+function closeAlert(e){
+	e.target.parentElement.remove();
+	return;
+}
+
+function setPrefValues(e){
+	let ulMenu = e.target.parentElement.parentElement;
+	let alertBackground = document.getElementsByClassName('background-alert')[0];
+	let removeSel = ulMenu.querySelector('#remove-select');
+	let storageSel = ulMenu.querySelector('#storage-select');
+
+	if(removeSel.value !== data.userSetting['delete'][removeSel.value]){
+		data.userSetting.setDelete(removeSel.value);
+	}
+
+	if(storageSel.value !== data.userSetting['storage'][storageSel.value]){
+		data.userSetting.setStorage(storageSel.value);
+	}
+
+	alertBackground.click();
+}
+
+function handleRestore(e){
+	console.log('nation')
 }

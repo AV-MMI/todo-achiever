@@ -56,7 +56,6 @@ const storage = {
 		}
 	},
 
-
 	uniqueAtLevel(obj){
 		// get obj level
 		let projectHost = this.getObj(['title', obj.project]) || this.objs;
@@ -131,7 +130,6 @@ const storage = {
 		// inside a project
 		else {
 			let projectHost = this.getObj(['title', obj.project]);
-			console.log(projectHost, obj.project, 'projectHost')
 			if(obj.type == 'project'){
 				delete projectHost[obj.title];
 			}
@@ -155,25 +153,48 @@ const userSetting = {
 		local: false,
 	},
 
-	toggleDeleteVals(){
-		if(this.delete.partial){
-			this.delete.complete = true;
-			this.delete.partial = false;
-		} else {
+	setDelete(value){
+		if(value == 'partial'){
 			this.delete.complete = false;
 			this.delete.partial = true;
+		} else {
+			this.delete.complete = true;
+			this.delete.partial = false;
 		}
 	},
 
-	useStorage( sto ){
-		if(sto){
-			for(let typeSto in this.storage){
-				if(typeSto == sto){
-					this.storage[typeSto] = true;
-				} else {
-					this.storage[typeSto] = false;
-				}
+	getDeleteVal(){
+		for(let prop in userSetting['delete']){
+			if(userSetting['delete'][prop]){
+				return prop;
 			}
+
 		}
+
+		return;
+	},
+
+	setStorage(value){
+		if(value == 'partial'){
+			this.delete.complete = false;
+			this.delete.partial = true;
+		} else {
+			this.delete.complete = true;
+			this.delete.partial = false;
+		}
+	},
+
+	getStorageVal(){
+		for(let prop in userSetting['storage']){
+			console.log(userSetting['storage'][prop], prop, '<---')
+			if(userSetting['storage'][prop]){
+				return prop;
+			}
+
+		}
+
+		return;
 	}
 }
+
+console.log(userSetting.getDeleteVal(), 'valuwe');

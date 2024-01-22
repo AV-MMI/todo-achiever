@@ -43,7 +43,7 @@ let dummyTask2 = {
 
 let dummyTask3 = {
 	title: 'dTask3',
-	project: 'pro3',
+	project: 'trash',
 	done: false,
 	type: 'task',
 }
@@ -94,3 +94,7 @@ dom.displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 dom.displayAllTodos(data.storage.getObjs(['done', false]), displayWindow);
 
 let testObj = data.storage.getObj(['title', 'pro1']);
+
+// user preferences
+let userPreferencesBtn = document.getElementById('userpreferences-btn');
+userPreferencesBtn.addEventListener('click', dom.handleUserPref);
