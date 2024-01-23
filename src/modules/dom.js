@@ -133,11 +133,8 @@ function createTodoComponent(obj){
 				let restoreBtn = document.createElement('button');
 
 				wrapper.classList.add('deleted-item', 'v-flex');
-				if(obj.type !== 'note' && obj.type !== 'checklist'){
-					wrapper.classList.add('opacity-done');
-				} else {
-					wrapper.classList.add('no-margin');
-				}
+				wrapper.classList.add('no-margin');
+
 				restoreBtn.textContent = 'restore';
 				restoreBtn.classList.add('restore-btn', 'c-c-flex');
 				restoreBtn.addEventListener('click', handleRestore);
@@ -430,33 +427,20 @@ function displayGroup(e){
 	// items
 function changeStatus(e){
 	let overviewMenu = document.getElementById('overview-menu');
-	let component = e.target.parentElement.parentElement
-	let directory = component.getAttribute('directory');
-	let obj;
+	let lineItem = e.target.parentElement.parentElement;
+	let obj = data.storage.getObj(['id', lineItem.getAttribute('id')]) || data.storage.getObj(['id', lineItem.getAttribute('id')], data.storage.objs[ lineItem.getAttribute('directory') ]);
 
-	if(directory){
-		obj = data.storage.getObj(['id', component.getAttribute('id')], data.storage.objs[directory]);
-	} else {
-		obj = data.storage.getObj(['id', component.getAttribute('id')]);
-	}
+	if(obj){
+		// check item
+		let checkBtn = lineItem.querySelector('.check-btn');
+		checkBtn.classList.toggle('check-btn-done');
 
+		// cross title
+		let title = lineItem.querySelector('.title-cont');
+		title.classList.toggle('cross-title');
 
-	if(component.getAttribute('type') == 'note' || component.getAttribute('type') == 'checklist'){
-		component = component.parentElement;
-		if(obj){
-			component.children[0].children[0].children[0].classList.toggle('check-btn-done');
-			component.children[0].children[1].classList.toggle('cross-title');
-			component.classList.toggle('opacity-done');
-			obj.done = obj.done == true ? false : true;
-		}
-
-	} else {
-		if(obj){
-			component.children[0].children[0].classList.toggle('check-btn-done');
-			component.children[1].classList.toggle('cross-title');
-			component.classList.toggle('opacity-done');
-			obj.done = obj.done == true ? false : true;
-		}
+		// update prop
+		obj.done = obj.done ? false : true;
 	}
 
 	// update overview menu
@@ -593,35 +577,27 @@ function _handleDelete(e){
 	let lineCont = e.target.parentElement.parentElement.parentElement.parentElement;
 	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]) || data.storage.getObj(['id', lineCont.getAttribute('id')], data.storage.objs[lineCont.getAttribute('directory')]);
 
-	if(lineCont.getAttribute('type') == 'note' || lineCont.getAttribute('type') == 'checklist'){
-		lineCont.parentElement.remove();
-	} else {
-		lineCont.remove();
-	}
+	// deletion process is complete.
+	if(data.userSetting.getDeleteVal() == 'complete' || !obj.previousProject){
+		let topComponent = lineCont;
+		if(obj.type !=='task'){
+			topComponent = topComponent.parentElement;
+			data.storage.removeObj(obj);
+		}
 
-	// delete process is partial
-	if(data.userSetting.getDeleteVal() == 'partial'){
-		let objClone = JSON.parse(JSON.stringify(obj));
-		// our obj is currently out of trash
-		if(obj.project !== 'trash'){
+		topComponent.remove();
+
+		if(data.userSetting.getDeleteVal() == 'partial'){
+			let objClone = JSON.parse(JSON.stringify(obj));
 			objClone.previousProject = obj.project;
 			objClone.project = 'trash';
 
-			// remove previous obj referece and add current one.
-			data.storage.removeObj(obj);
-			data.storage.addObj(objClone);
-			console.log('asdasd jude', data.storage.objs);
-		}
-		// our project is already in trash: complete deletion;
-		else {
-			data.storage.removeObj(objClone, data.storage.objs['trash']);
-			console.log('te mata por plata mi pana', data.storage.objs);
+			data.storage.addObj(objClone, data.storage.objs['trash']);
 		}
 	}
 
-	// delete process is complete: just remove directly.
-	else {
-		data.storage.removeObj(obj);
+	else if(data.userSetting.getDeleteVal() == 'partial'){
+		return;
 	}
 }
 
