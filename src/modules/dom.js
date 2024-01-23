@@ -615,9 +615,9 @@ function objMenuHandler(e){
 function _handleDelete(e){
 	let lineCont = e.target.parentElement.parentElement.parentElement.parentElement;
 	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]) || data.storage.getObj(['id', lineCont.getAttribute('id')], data.storage.objs[lineCont.getAttribute('directory')]);
-
-	if(data.userSetting.getDeleteVal() == 'partial' && obj.previousProject){
+	if(data.userSetting.getDeleteVal() == 'partial' && obj.project == 'trash'){
 		let topComponent = lineCont.parentElement;
+
 		if(obj.type !== 'task'){
 			topComponent = topComponent.parentElement;
 		}
