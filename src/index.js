@@ -29,30 +29,30 @@ let dummyProject3 = {
 
 let dummyTask1 = {
 	title: 'dTask1',
-	project: 'pro1',
-	done: false,
+	project: 'trash',
+	done: true,
 	type: 'task',
 }
 
 let dummyTask2 = {
 	title: 'dTask2',
 	project: 'pro3',
-	done: false,
+	done: true,
 	type: 'task',
 }
 
 let dummyTask3 = {
 	title: 'dTask3',
 	project: 'trash',
-	done: false,
+	done: true,
 	type: 'task',
 }
 
 
 let dummyChecklist = {
 	title: 'weekly buying',
-	project: 'pro2',
-	done: false,
+	project: 'trash',
+	done: true,
 	type: 'checklist',
 	items: [{'done': false, 'title': 'lettuce'},
 			{'done': true, 'title': 'tomato'},

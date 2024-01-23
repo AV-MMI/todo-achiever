@@ -128,18 +128,24 @@ function createTodoComponent(obj){
 			optionsCont.appendChild(optionsBtn);
 
 			// if obj was deleted and deletion is partial
-			if(obj.previousProject && data.userSetting.getDeleteVal() == 'partial'){
+			if(obj.previousProject && data.userSetting.getDeleteVal() == 'partial' || obj.project == 'trash'){
 				let wrapper = document.createElement('div');
 				let restoreBtn = document.createElement('button');
 
-				wrapper.classList.add('deleted-item', 'v-flex');
-				wrapper.classList.add('no-margin');
+				wrapper.classList.add('deleted-item', 'v-flex', 'item');
 
 				restoreBtn.textContent = 'restore';
 				restoreBtn.classList.add('restore-btn', 'c-c-flex');
 				restoreBtn.addEventListener('click', handleRestore);
-
 				lineCont.classList.add('no-margin');
+
+				if(obj.done){
+					checkBtn.classList.add('check-btn-done');
+					titleCont.classList.add('cross-title');
+					if(obj.type == 'task'){
+						wrapper.classList.add('opacity-done');
+					}
+				}
 
 				wrapper.appendChild(restoreBtn);
 				wrapper.appendChild(lineCont);
@@ -148,11 +154,11 @@ function createTodoComponent(obj){
 			}
 
 			// if delete is complete then there is no need to add restore obj
-			if(obj.done){
+			if(obj.done && data.userSetting.getDeleteVal() == 'complete' || obj.done && obj.project !== 'trash'){
 				checkBtn.classList.add('check-btn-done');
 				titleCont.classList.add('cross-title');
 				if(obj.type !== 'note' && obj.type !== 'checklist'){
-					lineCont.classList.add('opacity-done')
+					lineCont.classList.add('opacity-done');
 				}
 			}
 			return lineCont;
@@ -165,11 +171,10 @@ function createTodoComponent(obj){
 			// create elements
 			let recWrapper = document.createElement('div');
 			let headCont = _createLineItem(obj);
-			if(obj.previousProject && data.userSetting.getDeleteVal() == 'none'){
+			if(obj.previousProject && data.userSetting.getDeleteVal() == 'partial'){
 				headCont.classList.add('no-margin');
 				headCont.classList.remove('opacity-done');
 			}
-			console.log(obj.previousProject == true,headCont, 'testo')
 				// bottom
 			let bottomCont = document.createElement('div');
 			if(obj.type == 'note'){
@@ -439,6 +444,21 @@ function changeStatus(e){
 		let title = lineItem.querySelector('.title-cont');
 		title.classList.toggle('cross-title');
 
+		// item opacity
+		if(obj.project == 'trash'){
+			if(obj.type == 'task'){
+				lineItem.parentElement.classList.toggle('opacity-done');
+			} else {
+				lineItem.parentElement.parentElement.classList.toggle('opacity-done');
+			}
+		} else {
+			if(obj.type == 'task'){
+				lineItem.classList.toggle('opacity-done');
+			} else {
+				lineItem.parentElement.classList.toggle('opacity-done');
+			}
+		}
+
 		// update prop
 		obj.done = obj.done ? false : true;
 	}
@@ -462,7 +482,6 @@ function itemOptions(e){
 	// if obj is valid it means that it come from projects and not from trash
 	if(!obj){
 		obj = data.storage.getObj(['id', lineComponent.getAttribute('id')], data.storage.objs[lineComponent.getAttribute('directory')]);
-		console.log('aja')
 	}
 	// menu has not been opened, son open it !
 	if(obj && menuAppended.length == 0){
@@ -585,7 +604,6 @@ function _handleDelete(e){
 
 		data.storage.removeObj(obj);
 		topComponent.remove();
-		console.log(topComponent, 'topComponent', data.storage.objs);
 		return;
 	}
 	// deletion process is complete. OR, our deletion process is partial and our item
@@ -605,7 +623,6 @@ function _handleDelete(e){
 			objClone.project = 'trash';
 			data.storage.addObj(objClone, data.storage.objs['trash']);
 		}
-		console.log('complete deletion', data.userSetting.getDeleteVal() == 'partial', data.storage.objs);
 	}
 }
 
@@ -695,5 +712,4 @@ function setPrefValues(e){
 }
 
 function handleRestore(e){
-	console.log('nation')
 }
