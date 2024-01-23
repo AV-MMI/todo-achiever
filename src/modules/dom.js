@@ -577,27 +577,35 @@ function _handleDelete(e){
 	let lineCont = e.target.parentElement.parentElement.parentElement.parentElement;
 	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]) || data.storage.getObj(['id', lineCont.getAttribute('id')], data.storage.objs[lineCont.getAttribute('directory')]);
 
-	// deletion process is complete.
-	if(data.userSetting.getDeleteVal() == 'complete' || !obj.previousProject){
+	if(data.userSetting.getDeleteVal() == 'partial' && obj.previousProject){
+		let topComponent = lineCont.parentElement;
+		if(obj.type !== 'task'){
+			topComponent = topComponent.parentElement;
+		}
+
+		data.storage.removeObj(obj);
+		topComponent.remove();
+		console.log(topComponent, 'topComponent', data.storage.objs);
+		return;
+	}
+	// deletion process is complete. OR, our deletion process is partial and our item
+	// is out of trash
+	else if(data.userSetting.getDeleteVal() == 'complete' || !obj.hasOwnProperty('previousProject')){
 		let topComponent = lineCont;
 		if(obj.type !=='task'){
 			topComponent = topComponent.parentElement;
-			data.storage.removeObj(obj);
 		}
 
+		data.storage.removeObj(obj);
 		topComponent.remove();
 
 		if(data.userSetting.getDeleteVal() == 'partial'){
 			let objClone = JSON.parse(JSON.stringify(obj));
 			objClone.previousProject = obj.project;
 			objClone.project = 'trash';
-
 			data.storage.addObj(objClone, data.storage.objs['trash']);
 		}
-	}
-
-	else if(data.userSetting.getDeleteVal() == 'partial'){
-		return;
+		console.log('complete deletion', data.userSetting.getDeleteVal() == 'partial', data.storage.objs);
 	}
 }
 
