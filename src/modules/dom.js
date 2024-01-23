@@ -476,7 +476,7 @@ function changeStatus(e){
 function itemOptions(e){
 	let buttonTarget = e.target;
 	let lineComponent = e.target.parentElement.parentElement;
-	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]);
+	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]) || data.storage.getObj(['id', lineComponent.getAttribute('id')], data.storage.objs[ lineComponent.getAttribute('directory') ]);
 	let menuAppended = lineComponent.getElementsByClassName('obj-menu');
 
 	// if obj is valid it means that it come from projects and not from trash
@@ -487,9 +487,29 @@ function itemOptions(e){
 	if(obj && menuAppended.length == 0){
 		let objMenu = createObjMenu(obj);
 		lineComponent.lastChild.appendChild(objMenu);
+		if(obj.project !== 'trash'){
+			if(obj.type == 'task'){
+				lineComponent.classList.add('line-n-Menu');
+			}
+			// obj is in trash, so counts with restore button
+		} else {
+			if(obj.type == 'task'){
+				lineComponent.parentElement.classList.add('line-n-Menu');
+			}
+		}
  	} else {
 		menuAppended = lineComponent.getElementsByClassName('obj-menu');
 		menuAppended[0].remove();
+		if(obj.project !== 'trash'){
+			if(obj.type == 'task'){
+				lineComponent.classList.remove('line-n-Menu');
+			}
+			// obj is in trash, so counts with restore button
+		} else {
+			if(obj.type == 'task'){
+				lineComponent.parentElement.classList.remove('line-n-Menu');
+			}
+		}
 	}
 
 	return;

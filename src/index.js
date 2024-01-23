@@ -29,7 +29,7 @@ let dummyProject3 = {
 
 let dummyTask1 = {
 	title: 'dTask1',
-	project: 'trash',
+	project: 'pro1',
 	done: true,
 	type: 'task',
 }
@@ -43,7 +43,7 @@ let dummyTask2 = {
 
 let dummyTask3 = {
 	title: 'dTask3',
-	project: 'trash',
+	project: 'pro1',
 	done: true,
 	type: 'task',
 }
@@ -91,8 +91,8 @@ trashBtn.addEventListener('click', dom.displayGroup);
 
 dom.displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
 dom.displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
-dom.displayAllTodos(data.storage.getObjs(['done', false]), displayWindow);
-
+dom.displayAllTodos(data.storage.getObjs(['todo', true]), displayWindow);
+console.log(data.storage.objs)
 let testObj = data.storage.getObj(['title', 'pro1']);
 
 // user preferences

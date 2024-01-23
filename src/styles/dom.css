@@ -44,6 +44,7 @@ button {
 .item {
 	max-width: 350px;
 	margin-bottom: 20px;
+	transition: 0.5;
 }
 
 .line-container {
@@ -126,6 +127,10 @@ button {
 
 .options-btn:hover {
 	/color: red;
+}
+
+.line-n-Menu {
+	margin-bottom: 120px;
 }
 
 .obj-menu-opt {
