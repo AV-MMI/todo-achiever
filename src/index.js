@@ -51,7 +51,7 @@ let dummyTask3 = {
 
 let dummyChecklist = {
 	title: 'weekly buying',
-	project: 'pro2',
+	project: 'pro1',
 	done: true,
 	type: 'checklist',
 	previousProject: 'pro1',

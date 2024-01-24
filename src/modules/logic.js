@@ -12,7 +12,7 @@ class Task {
 }
 
 class Project {
-	constructor(title, project='', done=false){
+	constructor(title='', project='', done=false){
 		this.title = title.toLowerCase();
 		this.project = project.toLowerCase();
 		this.done = done;

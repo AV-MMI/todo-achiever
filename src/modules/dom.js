@@ -133,6 +133,7 @@ function createTodoComponent(obj){
 				let restoreBtn = document.createElement('button');
 
 				wrapper.classList.add('deleted-item', 'v-flex', 'item');
+				wrapper.setAttribute('id', obj.id);
 
 				restoreBtn.textContent = 'restore to previous project';
 				restoreBtn.classList.add('restore-btn', 'c-c-flex');
@@ -744,4 +745,24 @@ function setPrefValues(e){
 }
 
 function handleRestore(e){
+	let overviewMenu = document.getElementById('overview-menu');
+	let component = e.target.parentElement;
+	let obj = data.storage.getObj(['id', component.getAttribute('id')], data.storage.objs['trash']);
+	let objCopy = JSON.parse(JSON.stringify(obj));
+
+	// WORKING
+	objCopy.project = obj.previousProject;
+	delete objCopy.previousProject;
+	if(obj.type == 'task'){
+		component.remove();
+	} else {
+		component.parentElement.remove();
+	}
+
+	data.storage.removeObj(obj, data.storage.objs['trash']);
+	data.storage.addObj(objCopy);
+
+	// update overview menu
+	cleanDisplay(overviewMenu)
+	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
 }
