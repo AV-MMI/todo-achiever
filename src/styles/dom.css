@@ -67,8 +67,8 @@ button {
 }
 
 .restore-btn {
-	min-width: 150px;
-	max-width: 150px;
+	min-width: 250px;
+	max-width: 250px;
 	border-left: 2px solid black;
 	border-top: 2px solid black;
 	border-right: 2px solid black;

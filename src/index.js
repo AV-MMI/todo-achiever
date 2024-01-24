@@ -84,6 +84,9 @@ let overviewMenu = document.getElementById('overview-menu');
 
 let displayWindow = document.getElementById('window-content');
 
+let themeBtn = document.getElementById('theme-btn');
+themeBtn.addEventListener('click', (e)=>{console.log(data.storage.objs)})
+
 unassignedBtn.addEventListener('click', dom.displayGroup);
 completedBtn.addEventListener('click', dom.displayGroup);
 projectsBtn.addEventListener('click', dom.unfoldMenu);

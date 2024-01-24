@@ -134,7 +134,7 @@ function createTodoComponent(obj){
 
 				wrapper.classList.add('deleted-item', 'v-flex', 'item');
 
-				restoreBtn.textContent = 'restore';
+				restoreBtn.textContent = 'restore to previous project';
 				restoreBtn.classList.add('restore-btn', 'c-c-flex');
 				restoreBtn.addEventListener('click', handleRestore);
 				lineCont.classList.add('no-margin');
@@ -519,7 +519,9 @@ function itemOptions(e){
 function objMenuHandler(e){
 	let overviewMenu = document.getElementById('overview-menu');
 	let lineComponent = e.target.parentElement.parentElement.parentElement.parentElement;
-	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]);
+	let ul = lineComponent.querySelector('ul');
+	console.log(ul, 'ul')
+	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]) || data.storage.getObj(['id', lineComponent.getAttribute('id')], data.storage.objs[ lineComponent.getAttribute('directory') ]);
 	if(e.target.getAttribute('data-opt') == 'delete'){
 		_handleDelete(e);
 
@@ -653,11 +655,12 @@ function _handleUpdate(e){
 	let ul = e.target.parentElement.parentElement;
 	let lineCont = ul.parentElement.parentElement.parentElement;
 	let optionsBtn = lineCont.querySelector('.options-btn');
-	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]);
+	let obj = data.storage.getObj(['id', lineCont.getAttribute('id')]) || data.storage.getObj(['id', lineCont.getAttribute('id')], data.storage.objs[ lineCont.getAttribute('directory') ]);
 
 	let inputTitle = ul.querySelector('#title-input');
 	let selectEl = ul.querySelector('#select-project');
 	let objCopy = JSON.parse(JSON.stringify(obj));
+	delete objCopy.previousProject;
 	let overviewMenu = document.getElementById('overview-menu');
 
 	if(inputTitle.value !== obj.title){
@@ -672,15 +675,22 @@ function _handleUpdate(e){
 	if(selectEl.value !== obj.project){
 		objCopy.project = selectEl.value;
 
-		data.storage.removeObj(obj);
 		if(data.storage.uniqueAtLevel(objCopy)){
 			if(lineCont.getAttribute('type') == 'task'){
-				lineCont.remove();
+				if(obj.project == 'trash'){
+					lineCont.parentElement.remove();
+				} else {
+					lineCont.remove();
+				}
 			}
 
 			else if(lineCont.getAttribute('type') == 'note' || lineCont.getAttribute('type') == 'checklist'){
 				let recWrap = lineCont.parentElement;
-				recWrap.remove();
+				if(obj.project == 'trash'){
+					recWrap.parentElement.remove();
+				} else {
+					recWrap.remove();
+				}
 			}
 
 			data.storage.addObj(objCopy);
@@ -688,6 +698,8 @@ function _handleUpdate(e){
 		} else {
 			alert('there is another item with that title in the selected project');
 		}
+
+		data.storage.removeObj(obj);
 	}
 
 	// close menu
