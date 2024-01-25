@@ -213,6 +213,8 @@ button {
 	min-width: max-content;
 	display: flex;
 	flex-direction: column;
+	max-width: 350px;
+	min-width: 346px;
 }
 
 .rec-wrapper > .item {
@@ -228,8 +230,9 @@ button {
 	padding: 10px;
 	padding-left: 20px;
 	word-wrap: break-word;
-	width: auto;
-	max-width: inherit;
+	max-height: 300px;
+	overflow: auto;
+	max-height: 200px;
 }
 
 	/*checklist*/

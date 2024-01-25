@@ -180,14 +180,16 @@ function createTodoComponent(obj){
 			let bottomCont = document.createElement('div');
 			if(obj.type == 'note'){
 				// creating each p element in base to its paragraph.
-				for(let paragraph in obj.text){
+				let paragraphArr = obj.text.split("\n");
+				console.log(paragraphArr, '<--')
+				for(let paragraph in paragraphArr){
 					let p = document.createElement('p');
-					p.textContent = obj.text[paragraph];
+					p.textContent = paragraphArr[paragraph];
 					bottomCont.appendChild(p);
 				}
 			}
 
-			if(obj.type == 'checklist'){
+			else if(obj.type == 'checklist'){
 				// creating each item in checklist
 				for(let task in obj.items){
 					let taskWrapper = document.createElement('div');
@@ -983,14 +985,13 @@ function handleExtractAndCreateObj(e){
 					});
 
 					objToCreate['items'] = tasksToUseArr;
-					logic.createItem(objToCreate);
 					// remove previous added tasks
 					createTaskParent.removeAttribute('data-tasks');
 					counterSpan.textContent = '0';
 				}
 
 			}
-
+			logic.createItem(objToCreate);
 		} else {
 			logic.createItem(objToCreate);
 		}
