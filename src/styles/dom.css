@@ -135,8 +135,12 @@ button {
 	transition: 0.2s;
 }
 
-.line-n-Menu {
+.line-n-menu {
 	margin-bottom: 120px;
+}
+
+.line-n-update-menu {
+	margin-bottom: 190px;
 }
 
 .obj-menu-opt {

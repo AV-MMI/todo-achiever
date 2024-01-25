@@ -620,25 +620,31 @@ function itemOptions(e){
 		lineComponent.lastChild.appendChild(objMenu);
 		if(obj.project !== 'trash'){
 			if(obj.type == 'task'){
-				lineComponent.classList.add('line-n-Menu');
+				lineComponent.classList.add('line-n-menu');
 			}
 			// obj is in trash, so counts with restore button
 		} else {
 			if(obj.type == 'task'){
-				lineComponent.parentElement.classList.add('line-n-Menu');
+				lineComponent.parentElement.classList.add('line-n-menu');
 			}
 		}
  	} else {
 		menuAppended = lineComponent.getElementsByClassName('obj-menu');
 		menuAppended[0].remove();
-		if(obj.project !== 'trash'){
+		if(obj && obj.project !== 'trash'){
 			if(obj.type == 'task'){
-				lineComponent.classList.remove('line-n-Menu');
+				lineComponent.classList.remove('line-n-menu');
+				if(lineComponent.classList.contains('line-n-update-menu')){
+					lineComponent.classList.remove('line-n-update-menu');
+				}
 			}
 			// obj is in trash, so counts with restore button
 		} else {
-			if(obj.type == 'task'){
-				lineComponent.parentElement.classList.remove('line-n-Menu');
+			if(obj && obj.type == 'task'){
+				lineComponent.parentElement.classList.remove('line-n-menu');
+				if(lineComponent.parentElement.classList.contains('line-n-update-menu')){
+					lineComponent.parentElement.classList.remove('line-n-update-menu');
+				}
 			}
 		}
 	}
@@ -730,8 +736,8 @@ function objMenuHandler(e){
 		}
 
 		e.target.parentElement.parentElement.appendChild(_createUlUpdateMenu(obj));
-		console.log(e.target.parentElement.parentElement, 'remember');
 		e.target.parentElement.parentElement.firstChild.remove();
+		lineComponent.classList.add('line-n-update-menu');
 
 		return;
 	}
@@ -758,28 +764,29 @@ function _handleDelete(e){
 		if(obj.type !== 'task'){
 			topComponent = topComponent.parentElement;
 		}
-
+		console.log('wsss', topComponent, obj)
 		data.storage.removeObj(obj);
 		topComponent.remove();
 		return;
 	}
 	// deletion process is complete. OR, our deletion process is partial and our item
 	// is out of trash
-	else if(data.userSetting.getDeleteVal() == 'complete' || !obj.hasOwnProperty('previousProject')){
+	else if(data.userSetting.getDeleteVal() == 'complete' || obj.previousProject == false){
 		let topComponent = lineCont;
 		if(obj.type !=='task'){
 			topComponent = topComponent.parentElement;
 		}
 
-		data.storage.removeObj(obj);
-		topComponent.remove();
-
 		if(data.userSetting.getDeleteVal() == 'partial'){
 			let objClone = JSON.parse(JSON.stringify(obj));
 			objClone.previousProject = obj.project;
 			objClone.project = 'trash';
+			console.log(objClone, 'objClone');
 			logic.createItem(objClone, data.storage.objs['trash']);
 		}
+
+		data.storage.removeObj(obj);
+		topComponent.remove();
 	}
 }
 
@@ -795,8 +802,9 @@ function _handleUpdate(e){
 	let inputTitle = ul.querySelector('#title-input');
 	let selectEl = ul.querySelector('#select-project');
 	let objCopy = JSON.parse(JSON.stringify(obj));
-	delete objCopy.previousProject;
 	let overviewMenu = document.getElementById('overview-menu');
+
+	delete objCopy.previousProject;
 
 	if(inputTitle.value !== obj.title){
 		let itemTitle = lineCont.querySelector(`#title-${obj.id}`);
@@ -908,7 +916,6 @@ function createNewObjWindow(e){
 	let background = alert.getElementsByClassName('background-alert')[0]
 	let createObjMenu = createUlForCreateObj(typeOfObj);
 
-	console.log(e.target, typeOfObj, 'regalarte mi amor');
 	centralWindow.appendChild(createObjMenu);
 	let main = document.querySelector('main');
 	main.appendChild(alert);
@@ -976,6 +983,7 @@ function handleExtractAndCreateObj(e){
 					});
 
 					objToCreate['items'] = tasksToUseArr;
+					logic.createItem(objToCreate);
 					// remove previous added tasks
 					createTaskParent.removeAttribute('data-tasks');
 					counterSpan.textContent = '0';

@@ -54,7 +54,7 @@ let dummyChecklist = {
 	project: 'pro1',
 	done: true,
 	type: 'checklist',
-	previousProject: 'pro1',
+	//previousProject: 'pro1',
 	items: [{'done': false, 'title': 'lettuce'},
 			{'done': true, 'title': 'tomato'},
 			{'done': false, 'title': 'chicken'}],
