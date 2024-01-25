@@ -102,3 +102,15 @@ let testObj = data.storage.getObj(['title', 'pro1']);
 // user preferences
 let userPreferencesBtn = document.getElementById('userpreferences-btn');
 userPreferencesBtn.addEventListener('click', dom.handleUserPref);
+
+
+// creating new objs
+let newTask = document.getElementById("newTask-btn-opt");
+let newProject = document.getElementById("newProject-btn-opt");
+let newNote = document.getElementById("newNote-btn-opt");
+let newChecklist = document.getElementById("newChecklist-btn-opt");
+
+newTask.addEventListener('click', dom.createNewObjWindow);
+newProject.addEventListener('click', dom.createNewObjWindow);
+newNote.addEventListener('click', dom.createNewObjWindow);
+newChecklist.addEventListener('click', dom.createNewObjWindow);

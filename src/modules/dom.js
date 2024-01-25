@@ -1,6 +1,6 @@
 import * as logic from './logic.js'
 import * as data from './data.js';
-export { displayGroup, displayMenuComponents, unfoldMenu, displayAllTodos, createObjMenu, handleUserPref}
+export { displayGroup, displayMenuComponents, unfoldMenu, displayAllTodos, createObjMenu, handleUserPref, createNewObjWindow}
 
 // DISPLAY
 	// TODOS
@@ -238,11 +238,9 @@ function createTodoComponent(obj){
 
 	if(obj){
 		let component;
-		if(obj.type == 'task'){
-			logic.createItem(obj);
+		if(obj.type == 'task'){logic.createItem(obj);
 			component = _createLineItem(obj);
-		} else {
-			logic.createItem(obj);
+		} else {logic.createItem(obj);
 			component = _createRecItem(obj);
 		}
 
@@ -398,6 +396,138 @@ function createCentralWindowAlert(){
 	return wrapper;
 }
 
+// creating new objs
+function createUlForCreateObj(objType){
+	let basicMenu = createBasicMenu();
+	let ul = basicMenu.querySelector('ul');
+
+	let liTitle = document.createElement('li');
+	let titleLabel = document.createElement('label');
+	let titleInput = document.createElement('input');
+
+	let liProject = document.createElement('li');
+	let projectLabel = document.createElement('label');
+	let projectSelect = document.createElement('select');
+
+		// reserved for notes and checklist
+	let liSpecial = document.createElement('li');;
+
+	let liCreate = document.createElement('li');
+	let createBtn = document.createElement('button');
+
+	ul.setAttribute('obj-type', objType);
+
+	titleLabel.setAttribute('for', 'title-input');
+	titleLabel.textContent = 'title';
+	titleInput.setAttribute('id', 'title-input');
+	titleInput.setAttribute('type', 'text');
+	titleInput.setAttribute('placeholder', 'obj title');
+
+	projectLabel.setAttribute('for', 'select-project');
+	projectLabel.textContent = 'select project'
+	projectSelect.setAttribute('id', 'select-project');
+	projectSelect.classList.add('select');
+	// get projects to make each option
+	let projects = data.storage.getObjs(['type', 'project']);
+	if(projects){
+		let proOpt;
+		projects.forEach((project) => {
+		proOpt = document.createElement('option');
+		proOpt.value=`${project.title}`;
+		proOpt.textContent = `${project.title}`;
+
+		projectSelect.appendChild(proOpt);
+			});
+		// Option for unassigned
+		proOpt = document.createElement('option');
+		proOpt.value=`${''}`;
+		proOpt.textContent = 'unassigned';
+		if(proOpt.value == 'unassigned'){
+			proOpt.setAttribute('selected', true);
+		}
+		projectSelect.appendChild(proOpt);
+	}
+
+	liTitle.appendChild(titleLabel);
+	liTitle.appendChild(titleInput);
+
+	liProject.appendChild(projectLabel);
+	liProject.appendChild(projectSelect);
+
+	createBtn.classList.add('create-btn');
+	createBtn.textContent = `new ${objType}`;
+
+	if(objType == 'note' || objType == 'checklist'){
+		if(objType == 'note'){
+			// adds input for its text
+			let noteLabel = document.createElement('label');
+			let noteTextarea = document.createElement('textarea');
+
+			noteLabel.setAttribute('for', 'note-textarea');
+			noteLabel.textContent = 'notes';
+
+			noteTextarea.setAttribute('id', 'note-textarea');
+			noteTextarea.setAttribute('rows', '5');
+			noteTextarea.setAttribute('cols', '33');
+
+			liSpecial.appendChild(noteLabel);
+			liSpecial.appendChild(noteTextarea);
+		}
+		// objType == 'checklist'
+		else {
+			// number of tasks counter
+			let taskCountDiv = document.createElement('div');
+			let taskSpan = document.createElement('span');
+			let counterSpan = document.createElement('span');
+
+			// label
+			let addTaskLabel = document.createElement('label');
+
+			// add new task for checklist
+			let newTaskDiv = document.createElement('div');
+			let taskTitleInput = document.createElement('input');
+			let addTaskBtn = document.createElement('button');
+
+			// number of tasks counter
+			taskSpan.textContent = 'Number of tasks: ';
+			counterSpan.textContent = '0';
+			counterSpan.setAttribute('id', 'counter-span');
+
+			taskCountDiv.appendChild(taskSpan);
+			taskCountDiv.appendChild(counterSpan);
+			taskCountDiv.classList.add('h-flex', 'task-counter-div');
+
+			// add new task for checklist
+			newTaskDiv.appendChild(taskTitleInput);
+			newTaskDiv.appendChild(addTaskBtn);
+			newTaskDiv.classList.add('h-c-flex', 'new-task-div-checklist');
+
+			addTaskLabel.setAttribute('for', 'task-title');
+			addTaskLabel.textContent = 'add task to checklist';
+
+			taskTitleInput.setAttribute('id', 'task-title');
+			taskTitleInput.setAttribute('type', 'text');
+			taskTitleInput.setAttribute('placeholder', 'task title');
+
+			addTaskBtn.textContent = '+';
+			addTaskBtn.classList.add('add-task-btn');
+
+			addTaskBtn.addEventListener('click', handleAddTask)
+
+			liSpecial.appendChild(taskCountDiv);
+			liSpecial.appendChild(addTaskLabel);
+			liSpecial.appendChild(newTaskDiv);
+
+		}
+	}
+
+	liCreate.appendChild(createBtn);
+	createBtn.addEventListener('click', handleExtractAndCreateObj);
+
+	[liTitle, liProject, liSpecial, liCreate].forEach((li) => {ul.appendChild(li); li.classList.add('obj-menu-opt')});
+	return basicMenu;
+}
+
 // event listeners
 	// menus
 function unfoldMenu(e){
@@ -521,7 +651,6 @@ function objMenuHandler(e){
 	let overviewMenu = document.getElementById('overview-menu');
 	let lineComponent = e.target.parentElement.parentElement.parentElement.parentElement;
 	let ul = lineComponent.querySelector('ul');
-	console.log(ul, 'ul')
 	let obj = data.storage.getObj(['id', lineComponent.getAttribute('id')]) || data.storage.getObj(['id', lineComponent.getAttribute('id')], data.storage.objs[ lineComponent.getAttribute('directory') ]);
 	if(e.target.getAttribute('data-opt') == 'delete'){
 		_handleDelete(e);
@@ -534,6 +663,7 @@ function objMenuHandler(e){
 		function _createUlUpdateMenu(obj){
 			let ul = document.createElement('ul');
 			let liTitle = document.createElement('li');
+			let titleLabel = document.createElement('label');
 			let titleInput = document.createElement('input');
 
 			let liSelect = document.createElement('li');
@@ -544,6 +674,9 @@ function objMenuHandler(e){
 			let updateBtn = document.createElement('button');
 
 			liTitle.classList.add('obj-menu-opt');
+
+			titleLabel.textContent = 'title';
+			titleLabel.setAttribute('for', 'title-input');
 			titleInput.setAttribute('type', 'text');
 			titleInput.setAttribute('maxlength', '25');
 			titleInput.setAttribute('value', obj.title);
@@ -588,7 +721,7 @@ function objMenuHandler(e){
 
 
 			[selectLabel, selectEl].forEach((select) => liSelect.appendChild(select));
-			liTitle.appendChild(titleInput);
+			[titleLabel, titleInput].forEach((titleEl) =>  liTitle.appendChild(titleEl));
 			liUpdateBtn.appendChild(updateBtn);
 			[liTitle, liSelect, liUpdateBtn].forEach((li) => ul.appendChild(li));
 
@@ -597,6 +730,7 @@ function objMenuHandler(e){
 		}
 
 		e.target.parentElement.parentElement.appendChild(_createUlUpdateMenu(obj));
+		console.log(e.target.parentElement.parentElement, 'remember');
 		e.target.parentElement.parentElement.firstChild.remove();
 
 		return;
@@ -644,7 +778,7 @@ function _handleDelete(e){
 			let objClone = JSON.parse(JSON.stringify(obj));
 			objClone.previousProject = obj.project;
 			objClone.project = 'trash';
-			data.storage.addObj(objClone, data.storage.objs['trash']);
+			logic.createItem(objClone, data.storage.objs['trash']);
 		}
 	}
 }
@@ -670,7 +804,7 @@ function _handleUpdate(e){
 
 		objCopy.title = inputTitle.value;
 		data.storage.removeObj(obj);
-		data.storage.addObj(objCopy);
+		logic.createItem(objCopy);
 	}
 
 	if(selectEl.value !== obj.project){
@@ -694,7 +828,7 @@ function _handleUpdate(e){
 				}
 			}
 
-			data.storage.addObj(objCopy);
+			logic.createItem(objCopy);
 
 		} else {
 			alert('there is another item with that title in the selected project');
@@ -718,7 +852,7 @@ function handleUserPref(e){
 	let userPrefMenu = createUserPrefMenu();
 
 	centralWindow.appendChild(userPrefMenu);
-	let main = document.getElementsByTagName('main')[0];
+	let main = document.querySelector('main');
 	main.appendChild(alert);
 }
 
@@ -760,9 +894,110 @@ function handleRestore(e){
 	}
 
 	data.storage.removeObj(obj, data.storage.objs['trash']);
-	data.storage.addObj(objCopy);
+	logic.createItem(objCopy);
 
 	// update overview menu
 	cleanDisplay(overviewMenu)
 	displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+}
+
+function createNewObjWindow(e){
+	let typeOfObj = e.target.getAttribute('data-type');
+	let alert = createCentralWindowAlert();
+	let centralWindow = alert.getElementsByClassName('central-window-alert')[0];
+	let background = alert.getElementsByClassName('background-alert')[0]
+	let createObjMenu = createUlForCreateObj(typeOfObj);
+
+	console.log(e.target, typeOfObj, 'regalarte mi amor');
+	centralWindow.appendChild(createObjMenu);
+	let main = document.querySelector('main');
+	main.appendChild(alert);
+}
+
+function handleAddTask(e){
+	let liSpecial = e.target.parentElement.parentElement;
+	let parentDiv = liSpecial.querySelector('.new-task-div-checklist');
+	let counterSpan = liSpecial.querySelector('#counter-span');
+	let taskTitle = parentDiv.querySelector('#task-title');
+
+	if(taskTitle.value.length !== 0){
+		let task = `${taskTitle.value}`;
+
+		if(parentDiv.getAttribute('data-tasks')){
+			let taskHistory = parentDiv.getAttribute('data-tasks');
+			parentDiv.setAttribute('data-tasks', `${taskHistory},${task}`);
+		} else {
+			parentDiv.setAttribute('data-tasks', task);
+		}
+
+		taskTitle.value = '';
+		counterSpan.textContent = `${Number( counterSpan.textContent ) + 1}`;
+		return;
+	} else {
+		return;
+	}
+}
+
+function handleExtractAndCreateObj(e){
+	let overviewMenu = document.getElementById('overview-menu');
+	let ul = e.target.parentElement.parentElement;
+	let objType = ul.getAttribute('obj-type');
+
+	let objTitle = ul.querySelector('#title-input');
+	let objProject = ul.querySelector('#select-project');
+	let objToCreate = {};
+	if(objTitle.value.length !== 0){
+		objToCreate = {
+			title: objTitle.value,
+			project: objProject.value,
+			type: objType,
+		};
+
+
+		if(objType == 'note' || objType == 'checklist'){
+			if(objType == 'note'){
+				let text = ul.querySelector('#note-textarea');
+
+				if(text.value.length !== 0){
+					objToCreate['text'] = text.value;
+					text.value = '';
+				}
+			} else {
+				// objType == 'checklist'
+				let createTaskParent = ul.querySelector('.new-task-div-checklist');
+				let counterSpan = ul.querySelector('#counter-span');
+
+				let tasksTitlesArr = createTaskParent.getAttribute('data-tasks').split(',');
+				let tasksToUseArr = [];
+				if(tasksTitlesArr.length !== 0){
+					tasksTitlesArr.forEach((taskTitle) => {
+						let tempTask = {'done': false, 'title': taskTitle};
+						tasksToUseArr.push(tempTask);
+					});
+
+					objToCreate['items'] = tasksToUseArr;
+					// remove previous added tasks
+					createTaskParent.removeAttribute('data-tasks');
+					counterSpan.textContent = '0';
+				}
+
+			}
+
+		} else {
+			logic.createItem(objToCreate);
+		}
+
+		objTitle.value = '';
+
+		// update overview menu
+		cleanDisplay(overviewMenu)
+		displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+		if(objType == 'project'){
+			// update projects menu.
+			let projectsMenu = document.getElementById('projects-menu');
+
+			cleanDisplay(projectsMenu);
+			displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
+		}
+	}
 }

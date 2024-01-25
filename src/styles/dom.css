@@ -1,7 +1,17 @@
 button {
 	background-color: none;
-};15
+}
 
+.h-flex {
+	display: flex;
+	flex-direction: row;
+}
+
+.h-c-flex {
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+}
 
 .v-flex {
 	display: flex;
@@ -125,10 +135,6 @@ button {
 	transition: 0.2s;
 }
 
-.options-btn:hover {
-	/color: red;
-}
-
 .line-n-Menu {
 	margin-bottom: 120px;
 }
@@ -137,11 +143,8 @@ button {
 	margin-bottom: 10px;
 	transition: 0.5s;
 	text-decoration: none;
-}
-
-.obj-menu-opt:hover {
-	color: black;
-	text-decoration: underline;
+	display: flex;
+	flex-direction: column;
 }
 
 .menu-div {
@@ -234,3 +237,14 @@ button {
 	margin-right: 15px;
 }
 
+/* creating new objs*/
+.task-counter-div {
+	margin-bottom: 5px;
+	font-size: 10px;
+}
+
+.add-task-btn {
+	padding: 0px 5px;
+	border: 1px solid #898782;
+	margin-left: 5px;
+}
