@@ -194,27 +194,39 @@ function createTodoComponent(obj){
 				for(let task in obj.items){
 					let taskWrapper = document.createElement('div');
 					let checkBtn = document.createElement('button');
-					let title = document.createElement('span');
-
-					// getting what class should we use dependin of the state of obj.status
-					let status = task.done ? 'status-done' : 'status-pending';
-					let crossTitle = task.done ? 'crossTitle' : 'task-title';
+					let titleSpan = document.createElement('span');
 
 					// assign classes
 					taskWrapper.classList.add('task-wrapper', 'left-c-flex');
-					checkBtn.classList.add('check-btn', status);
-					title.classList.add(crossTitle);
+					checkBtn.classList.add('check-btn');
+					titleSpan.classList.add('checklist-task-title');
 
 					// assign text
-					title.textContent = obj.items[task]['title'];
+					titleSpan.textContent = obj.items[task]['title'];
+
+					if(obj.items[task].done){
+						checkBtn.classList.add('check-btn-done');
+						titleSpan.classList.add('crossTitle');
+					}
 
 					// append elements
 					taskWrapper.appendChild(checkBtn);
-					taskWrapper.appendChild(title);
+					taskWrapper.appendChild(titleSpan);
 
 					bottomCont.appendChild(taskWrapper);
+					checkBtn.addEventListener('click', handleChecklistTask)
 				}
 
+				let addTaskWrapper = document.createElement('div');
+				let addBtn = document.createElement('button');
+
+				addTaskWrapper.classList.add('task-wrapper', 'left-c-flex');
+				addBtn.textContent = 'add new task';
+				addBtn.classList.add('add-task-btn');
+				addTaskWrapper.appendChild(addBtn);
+
+				bottomCont.appendChild(addTaskWrapper);
+				addBtn.addEventListener('click', handleAddTaskInDisplay);
 				bottomCont.classList.add('checklist-item');
 			}
 
@@ -514,7 +526,7 @@ function createUlForCreateObj(objType){
 			addTaskBtn.textContent = '+';
 			addTaskBtn.classList.add('add-task-btn');
 
-			addTaskBtn.addEventListener('click', handleAddTask)
+			addTaskBtn.addEventListener('click', handleAddTaskInCreation);
 
 			liSpecial.appendChild(taskCountDiv);
 			liSpecial.appendChild(addTaskLabel);
@@ -923,7 +935,7 @@ function createNewObjWindow(e){
 	main.appendChild(alert);
 }
 
-function handleAddTask(e){
+function handleAddTaskInCreation(e){
 	let liSpecial = e.target.parentElement.parentElement;
 	let parentDiv = liSpecial.querySelector('.new-task-div-checklist');
 	let counterSpan = liSpecial.querySelector('#counter-span');
@@ -1009,4 +1021,62 @@ function handleExtractAndCreateObj(e){
 			displayMenuComponents(data.storage.getObjs(['type', 'project']), projectsMenu);
 		}
 	}
+}
+
+function handleChecklistTask(e){
+	let checkBtn = e.target;
+	let taskCont = checkBtn.parentElement;
+	let title = taskCont.querySelector('.checklist-task-title');
+	let objId = taskCont.parentElement.parentElement.getAttribute('id');
+	let obj = data.storage.getObj(['id', objId]);
+
+	let task = obj.getTask(title.textContent);
+	title.classList.toggle('crossTitle');
+	checkBtn.classList.toggle('check-btn-done');
+
+	if(task.done){
+		task.done = false;
+	} else {
+		task.done = true;
+	}
+
+}
+
+function handleAddTaskInDisplay(e){
+	function create newTaskMenu(){
+		let addTaskContainer = e.target.parentElement;
+		let basicMenu = createBasicMenu();
+		let ul = basicMenu.querySelector('ul');
+		let liTitle = document.createElement('li');
+		let titleLabel = document.createElement('label');
+		let titleInput = document.createElement('input');
+
+		let liDone = document.createElement('li');
+		let fieldset = document.createElement('fieldset');
+		let legend = document.createElement('legend');
+
+		let divFalseOpt = document.createElement('div');
+		let inputFalse = document.createElement('input');
+		let falseLabel = document.createElement('label');
+
+		let divTrueOpt = document.createElement('div');
+		let inputTrue = document.createElement('input');
+		let trueLabel = document.createElement('label');
+
+		let liCreateTask = document.createElement('li');
+
+		// append
+		ul.appendChild(liTitle);
+		ul.appendChild(liDone);
+		ul.appendChild(liCreateTask);
+
+		liTitle.appendChild(titleLabel);
+		liTitle.appendChild(titleInput);
+
+		liDone.appendChild(fieldset);
+		//working
+
+	}
+	console.log(addTaskContainer, '<---');
+	addTaskContainer.firstChild.remove();
 }

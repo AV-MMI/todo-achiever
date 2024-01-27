@@ -92,6 +92,7 @@ button {
 .restore-btn:hover {
 	background-color: #39A7FF;
 }
+
 .check-btn {
 	height: 15px;
 	width: 15px;
@@ -240,6 +241,8 @@ button {
 	padding-left: 40px;
 }
 
+.checklist-item > .task-wrapper
+
 .task-wrapper > button {
 	margin-right: 15px;
 }
@@ -254,4 +257,17 @@ button {
 	padding: 0px 5px;
 	border: 1px solid #898782;
 	margin-left: 5px;
+}
+
+.add-task-btn {
+	min-height: 15px;
+	min-width: 15px;
+	border-radius: 3px;
+	border: 2px solid #39A7FF;
+	margin: 5px;
+	font-size: 15px;
+}
+
+.add-task-btn:hover {
+	border: 2px solid #96E9C6;
 }
