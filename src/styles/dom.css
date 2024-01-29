@@ -156,6 +156,10 @@ button {
 	position: relative;
 }
 
+.menu-div-absolute {
+	position: absolute;
+}
+
 .obj-menu {
 	padding: 0px 10px;
 	background-color: #fbf9f1;
@@ -166,8 +170,6 @@ button {
 	align-items: flex-start;
 	justify-content: center;
 	color: #3d3b40;
-	position: absolute;
-	top: 25px;
 	z-index: 222;
 }
 
@@ -176,10 +178,11 @@ button {
 	margin-bottom: 10px;
 }
 
-.update-btn {
+.obj-menu-btn {
 	border-radius: 10px;
 	border: 1px solid black;
 	transition: 0.4s;
+	margin: 5px;
 }
 
 .update-btn:active {
@@ -270,4 +273,21 @@ button {
 
 .add-task-btn:hover {
 	border: 2px solid #96E9C6;
+}
+
+.positioning-for-menu-obj {
+	position: absolute;
+	top: 25px;
+}
+
+.positioning-for-newtask-checklist {
+	position: relative;
+}
+
+.addTask-menu-margin {
+	margin-bottom: 200px;
+}
+
+.new-task-checklist-ul > li:nth-child(n+2) {
+	margin-top: 10px;
 }

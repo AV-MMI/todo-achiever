@@ -181,7 +181,7 @@ function createTodoComponent(obj){
 			if(obj.type == 'note'){
 				// creating each p element in base to its paragraph.
 				let paragraphArr = obj.text.split("\n");
-				console.log(paragraphArr, '<--')
+
 				for(let paragraph in paragraphArr){
 					let p = document.createElement('p');
 					p.textContent = paragraphArr[paragraph];
@@ -226,7 +226,7 @@ function createTodoComponent(obj){
 				addTaskWrapper.appendChild(addBtn);
 
 				bottomCont.appendChild(addTaskWrapper);
-				addBtn.addEventListener('click', handleAddTaskInDisplay);
+				addBtn.addEventListener('click', displayAddTaskMenu);
 				bottomCont.classList.add('checklist-item');
 			}
 
@@ -306,6 +306,7 @@ function createObjMenu(obj){
 	let liUpdate = document.createElement('li');
 	let liComplete = document.createElement('li');
 
+	basicMenu.classList.add('positioning-for-menu-obj');
 	[liDelete, liUpdate, liComplete].forEach((li) => li.classList.add('obj-menu-opt'));
 	liDelete.setAttribute('data-opt', 'delete');
 	liUpdate.setAttribute('data-opt', 'update');
@@ -631,6 +632,7 @@ function itemOptions(e){
 	// menu has not been opened, son open it !
 	if(obj && menuAppended.length == 0){
 		let objMenu = createObjMenu(obj);
+		console.log(objMenu, 'objMenu')
 		lineComponent.lastChild.appendChild(objMenu);
 		if(obj.project !== 'trash'){
 			if(obj.type == 'task'){
@@ -710,7 +712,7 @@ function objMenuHandler(e){
 			selectEl.setAttribute('id', 'select-project');
 
 			updateBtn.textContent = 'update obj';
-			updateBtn.classList.add('update-btn');
+			updateBtn.classList.add('obj-menu-btn');
 
 			[liTitle, liSelect, liUpdateBtn].forEach((li) => {
 				li.classList.add('obj-menu-opt');
@@ -1042,10 +1044,15 @@ function handleChecklistTask(e){
 
 }
 
-function handleAddTaskInDisplay(e){
-	function create newTaskMenu(){
-		let addTaskContainer = e.target.parentElement;
-		let basicMenu = createBasicMenu();
+// remove the addTaskBtn and replace it with a menu that allows the user to add a task to
+// the checklist component -in storage too-.
+function displayAddTaskMenu(e){
+	let addTaskContainer = e.target.parentElement;
+	let recWrapper = addTaskContainer.parentElement.parentElement;
+	let addTaskBtn = addTaskContainer.querySelector('.add-task-btn');
+	let fullMenu = createNewTaskMenu();
+	function createNewTaskMenu(){
+		let basicMenu = createBasicMenu({'id': recWrapper.getAttribute('id')});
 		let ul = basicMenu.querySelector('ul');
 		let liTitle = document.createElement('li');
 		let titleLabel = document.createElement('label');
@@ -1063,20 +1070,140 @@ function handleAddTaskInDisplay(e){
 		let inputTrue = document.createElement('input');
 		let trueLabel = document.createElement('label');
 
-		let liCreateTask = document.createElement('li');
+		let liButtons = document.createElement('li');
+		let createTaskBtn = document.createElement('button');
+		let closeTaskMenu = document.createElement('button');
 
+		basicMenu.classList.add('positioning-for-newtask-checklist')
+		ul.classList.add('new-task-checklist-ul');
+		titleLabel.textContent = 'task title';
+		titleLabel.setAttribute('for', 'input-new-task-checklist');
+
+		titleInput.setAttribute('type', 'text');
+		titleInput.setAttribute('id', 'input-new-task-checklist');
+		titleInput.setAttribute('placeholder', 'new task title');
+
+		legend.textContent = 'Is this task done?';
+
+		inputFalse.setAttribute('type', 'radio');
+		inputFalse.setAttribute('name', 'done');
+		inputFalse.setAttribute('id', 'falseOpt-task');
+		inputFalse.setAttribute('checked', true);
+		//inputFalse.setAttribute('checked', true);
+		falseLabel.textContent = 'false';
+		falseLabel.setAttribute('for', 'falseOpt-task');
+
+		inputTrue.setAttribute('type', 'radio');
+		inputTrue.setAttribute('name', 'done');
+		inputTrue.setAttribute('id', 'trueOpt-task');
+		trueLabel.textContent = 'true';
+		trueLabel.setAttribute('for', 'trueOpt-task');
+
+		liButtons.classList.add('h-flex')
+		createTaskBtn.textContent = 'create task';
+		createTaskBtn.classList.add('obj-menu-btn');
+		closeTaskMenu.textContent = 'close';
+		closeTaskMenu.classList.add('obj-menu-btn')
 		// append
 		ul.appendChild(liTitle);
 		ul.appendChild(liDone);
-		ul.appendChild(liCreateTask);
+		ul.appendChild(liButtons);
 
 		liTitle.appendChild(titleLabel);
 		liTitle.appendChild(titleInput);
 
 		liDone.appendChild(fieldset);
-		//working
+		fieldset.appendChild(legend);
+		fieldset.appendChild(divFalseOpt);
+		fieldset.appendChild(divTrueOpt);
 
+		divFalseOpt.appendChild(inputFalse);
+		divFalseOpt.appendChild(falseLabel);
+
+		divTrueOpt.appendChild(inputTrue);
+		divTrueOpt.appendChild(trueLabel);
+
+		liButtons.appendChild(createTaskBtn);
+		liButtons.appendChild(closeTaskMenu);
+		createTaskBtn.addEventListener('click', createTaskBtnEvent);
+		closeTaskMenu.addEventListener('click', closeAddTaskMenu);
+		return basicMenu;
 	}
-	console.log(addTaskContainer, '<---');
+
+	recWrapper.classList.add('addTask-menu-margin');
+	addTaskContainer.classList.add('menu-div-absolute');
+	addTaskContainer.appendChild(fullMenu);
 	addTaskContainer.firstChild.remove();
+
+
+	// Depends on displayAddTaskMenu
+	function createTaskBtnEvent(e){
+		let ul = e.target.parentElement.parentElement;
+		let taskTitle = ul.querySelector('#input-new-task-checklist');
+		let checkedOpt = ul.querySelector('input[type="radio"]:checked');
+		let doneVal = checkedOpt.getAttribute('id')[0] == 'f' ? false : true;
+		let obj = data.storage.getObj(['id', ul.parentElement.getAttribute('id')]);
+
+		if(taskTitle.value.length > 0){
+			function createTaskComponent(taskObj){
+				let taskWrapper = document.createElement('div');
+				let checkBtn = document.createElement('button');
+				let titleSpan = document.createElement('span');
+
+				// assign classes
+				taskWrapper.classList.add('task-wrapper', 'left-c-flex');
+				checkBtn.classList.add('check-btn');
+				titleSpan.classList.add('checklist-task-title');
+
+				// assign text
+				titleSpan.textContent = taskObj['title'];
+
+				if(taskObj.done){
+					checkBtn.classList.add('check-btn-done');
+					titleSpan.classList.add('crossTitle');
+				}
+				// append elements
+				taskWrapper.appendChild(checkBtn);
+				taskWrapper.appendChild(titleSpan);
+				checkBtn.addEventListener('click', handleChecklistTask)
+
+				return taskWrapper;
+			}
+
+			let taskObj = {
+				'done': doneVal,
+				'title': taskTitle.value
+			}
+
+			// task is unique
+			if(!obj.getTask(taskObj.title)){
+				obj.addTask(taskObj);
+
+				// update checklist component
+				let recBottom = ul.parentElement.parentElement.parentElement;
+				let addTaskDiv = recBottom.querySelector('.menu-div-absolute');
+				// the last node is the taskWrapper that corresponds to the display of the create task menu
+				let taskComponent = createTaskComponent(taskObj);
+				recBottom.insertBefore(taskComponent, addTaskDiv);
+				taskTitle.value = '';
+			} else {
+				alert('A task with this title already exist!')
+			}
+		}
+	}
+}
+
+function closeAddTaskMenu(e){
+	/*
+	recBottom.parentElement.classList.remove('addTask-menu-margin');
+	addTaskDiv.appendChild(addTaskBtn);
+	addTaskDiv.firstChild.remove();
+	*/
+	let buttonsDiv = e.target.parentElement
+	let recBottom = buttonsDiv.parentElement.parentElement.parentElement.parentElement.parentElement;
+	let menuDiv = recBottom.querySelector('.obj-menu');
+
+	menuDiv.remove();
+	buttonsDiv.classList.remove('menu-div-absolute');
+	recBottom.classList.remove('addTask-menu-margin')
 }

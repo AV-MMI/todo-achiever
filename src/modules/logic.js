@@ -42,7 +42,7 @@ class Checklist {
 	}
 
 	getTask(title){
-		let task = data.storage.getObj(['title', title], this.items);
+		let task = data.storage.getObj(['title', title], this.items) || false;
 		return task;
 	}
 }
