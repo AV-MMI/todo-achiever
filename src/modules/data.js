@@ -1,5 +1,5 @@
 import * as logic from './logic.js'
-export { storage, userSetting }
+export { storage, userSetting, extractFromLocal, populateStorage }
 
 const storage = {
 	objs: {title: 'objs',
@@ -149,8 +149,8 @@ const userSetting = {
 		complete: false,
 	},
 	storage: {
-		none: true,
-		local: false,
+		none: false,
+		local: true,
 	},
 
 	setDelete(value){
@@ -197,4 +197,63 @@ const userSetting = {
 	}
 }
 
-console.log(userSetting.getDeleteVal(), 'valuwe');
+
+// from mdn
+function storageAvailable(type) {
+  let storage;
+  try {
+    storage = window[type];
+    const x = "__storage_test__";
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (e) {
+    return (
+      e instanceof DOMException &&
+      // everything except Firefox
+      (e.code === 22 ||
+        // Firefox
+        e.code === 1014 ||
+        // test name field too, because code might not be present
+        // everything except Firefox
+        e.name === "QuotaExceededError" ||
+        // Firefox
+        e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
+      // acknowledge QuotaExceededError only if there's something already stored
+      storage &&
+      storage.length !== 0
+    );
+  }
+}
+
+function extractFromLocal(){
+	console.log('asssss', storageAvailable('localStorage'), userSetting.storage.local);
+	if(storageAvailable('localStorage') && userSetting.storage.local){
+		if(localStorage.getItem('objs')){
+			let objs = window.localStorage.getItem('objs');
+			createLocalObjs(JSON.parse(objs));
+		} else {
+			populateStorage();
+		}
+	}
+}
+
+function createLocalObjs(objs){
+	function traverseObj(obj){
+		for(let prop in obj){
+			console.log(obj[prop].type, '<---prop');
+			if(obj[prop].type == 'dir' || obj[prop].type == 'project'){
+				console.log(obj[prop].title, '<--- title');
+			}
+		}
+	}
+
+	traverseObj(objs);
+}
+
+function populateStorage(){
+	localStorage.setItem('objs',  JSON.stringify(storage.objs));
+	localStorage.setItem('userSettingStorage', JSON.stringify(userSetting.storage));
+	localStorage.setItem('userSettingDelete', JSON.stringify(userSetting.delete));
+
+}

@@ -900,6 +900,9 @@ function setPrefValues(e){
 	}
 
 	alertBackground.click();
+	if(data.storage.userSetting.local){
+		data.populateStorage();
+	}
 }
 
 function handleRestore(e){

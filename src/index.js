@@ -114,3 +114,5 @@ newTask.addEventListener('click', dom.createNewObjWindow);
 newProject.addEventListener('click', dom.createNewObjWindow);
 newNote.addEventListener('click', dom.createNewObjWindow);
 newChecklist.addEventListener('click', dom.createNewObjWindow);
+
+data.extractFromLocal();
