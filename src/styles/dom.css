@@ -44,6 +44,12 @@ button {
 .no-margin {
 	margin: 0px !important;
 }
+
+.display-window {
+	display: flex;
+	flex-wrap: wrap;
+}
+
 /* general style for item*/
 .line-item-grid {
 	display: grid;
@@ -63,6 +69,7 @@ button {
   grid-template-columns: 1fr 4fr 1fr;
   grid-template-rows: 1fr;
   min-height: 25px;
+  max-height: 30px;
   max-width: 350px;
   min-width: 346px;
   border: 2px solid black;

@@ -233,7 +233,7 @@ function innitLocalStorage(){
 	let deleteSetting = JSON.parse(window.localStorage.getItem('userSettingDelete'));
 
 	userSetting.storage = storageSetting;
-	userSetting.delete = storageDelete;
+	userSetting.delete = deleteSetting;
 }
 
 function extractFromLocalAndCreateObjs(){
@@ -263,7 +263,6 @@ function _traverseObjAndCreate(level){
 }
 
 function populateStorage(){
-	console.log(storage.objs, 'obs')
 	localStorage.clear();
 
 	localStorage.setItem('objs',  JSON.stringify(storage.objs));

@@ -76,24 +76,24 @@ function createItem(obj){
 		let newNote = new Note(obj.title, obj.project, obj.done, obj.text, obj.previousProject);
 		data.storage.addObj(newNote);
 	}
-	
-	if(data.userSetting.local){
+
+	if(data.userSetting.storage.local){
 		data.populateStorage();
 	}
 }
 
 function removeItem(objId){
 	data.storage.removeObj( storage.getObj(['id', objId]) );
-	
-	if(data.userSetting.local){
+
+	if(data.userSetting.storage.local){
 		data.populateStorage();
 	}
 }
 
 function updateItem(objId, data=[]){
 	data.storage.updateObj( storage.getObj(['id', objId]), data );
-	
-	if(data.userSetting.local){
+
+	if(data.userSetting.storage.local){
 		data.populateStorage();
 	}
 }

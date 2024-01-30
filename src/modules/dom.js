@@ -632,8 +632,8 @@ function itemOptions(e){
 	// menu has not been opened, son open it !
 	if(obj && menuAppended.length == 0){
 		let objMenu = createObjMenu(obj);
-		console.log(objMenu, 'objMenu')
 		lineComponent.lastChild.appendChild(objMenu);
+
 		if(obj.project !== 'trash'){
 			if(obj.type == 'task'){
 				lineComponent.classList.add('line-n-menu');
@@ -683,7 +683,6 @@ function objMenuHandler(e){
 
 
 		if(data.userSetting.storage.local){
-			console.log('yas')
 			data.populateStorage();
 		}
 
@@ -764,7 +763,6 @@ function objMenuHandler(e){
 		lineComponent.classList.add('line-n-update-menu');
 
 		if(data.userSetting.storage.local){
-			console.log('yas')
 			data.populateStorage();
 		}
 
@@ -783,7 +781,6 @@ function objMenuHandler(e){
 
 
 		if(data.userSetting.storage.local){
-			console.log('yas')
 			data.populateStorage();
 		}
 
@@ -801,8 +798,8 @@ function _handleDelete(e){
 		if(obj.type !== 'task'){
 			topComponent = topComponent.parentElement;
 		}
-		console.log('wsss', topComponent, obj)
 		data.storage.removeObj(obj);
+
 		topComponent.remove();
 		return;
 	}
@@ -818,8 +815,8 @@ function _handleDelete(e){
 			let objClone = JSON.parse(JSON.stringify(obj));
 			objClone.previousProject = obj.project;
 			objClone.project = 'trash';
-			console.log(objClone, 'objClone');
 			logic.createItem(objClone, data.storage.objs['trash']);
+
 		}
 
 		data.storage.removeObj(obj);
@@ -917,13 +914,14 @@ function setPrefValues(e){
 	}
 
 	if(storageSel.value !== data.userSetting['storage'][storageSel.value]){
+		data.populateStorage();
 		data.userSetting.setStorage(storageSel.value);
 	}
 
+	data.populateStorage();
+
 	alertBackground.click();
-	if(data.storage.userSetting.local){
-		data.populateStorage();
-	}
+
 }
 
 function handleRestore(e){
@@ -979,6 +977,10 @@ function handleAddTaskInCreation(e){
 
 		taskTitle.value = '';
 		counterSpan.textContent = `${Number( counterSpan.textContent ) + 1}`;
+
+		if(data.userSetting.storage.local){
+			data.populateStorage();
+		}
 		return;
 	} else {
 		return;
