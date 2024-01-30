@@ -1,5 +1,5 @@
 import * as logic from './logic.js'
-export { storage, userSetting, extractFromLocal, populateStorage }
+export { storage, userSetting, innitLocalStorage, populateStorage }
 
 const storage = {
 	objs: {title: 'objs',
@@ -226,32 +226,46 @@ function storageAvailable(type) {
   }
 }
 
-function extractFromLocal(){
-	console.log('asssss', storageAvailable('localStorage'), userSetting.storage.local);
+function innitLocalStorage(){
+	extractFromLocalAndCreateObjs();
+
+	let storageSetting = JSON.parse(window.localStorage.getItem('userSettingStorage'));
+	let deleteSetting = JSON.parse(window.localStorage.getItem('userSettingDelete'));
+
+	userSetting.storage = storageSetting;
+	userSetting.delete = storageDelete;
+}
+
+function extractFromLocalAndCreateObjs(){
 	if(storageAvailable('localStorage') && userSetting.storage.local){
 		if(localStorage.getItem('objs')){
 			let objs = window.localStorage.getItem('objs');
-			createLocalObjs(JSON.parse(objs));
+			_traverseObjAndCreate(JSON.parse(objs));
 		} else {
 			populateStorage();
 		}
 	}
 }
 
-function createLocalObjs(objs){
-	function traverseObj(obj){
-		for(let prop in obj){
-			console.log(obj[prop].type, '<---prop');
-			if(obj[prop].type == 'dir' || obj[prop].type == 'project'){
-				console.log(obj[prop].title, '<--- title');
+function _traverseObjAndCreate(level){
+		// checking items at this level and look for a match
+		for(let obj in level){
+			if(level[obj]['title']){
+				logic.createItem(level[obj]);
 			}
 		}
-	}
 
-	traverseObj(objs);
+		for(let obj in level){
+			if(level[obj]['type'] == 'project' || level[obj]['type'] == 'dir'){
+				_traverseObjAndCreate(level[obj]);
+			}
+		}
 }
 
 function populateStorage(){
+	console.log(storage.objs, 'obs')
+	localStorage.clear();
+
 	localStorage.setItem('objs',  JSON.stringify(storage.objs));
 	localStorage.setItem('userSettingStorage', JSON.stringify(userSetting.storage));
 	localStorage.setItem('userSettingDelete', JSON.stringify(userSetting.delete));

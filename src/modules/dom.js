@@ -680,6 +680,14 @@ function objMenuHandler(e){
 		// update overview menu
 		cleanDisplay(overviewMenu)
 		displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+
+
+		if(data.userSetting.storage.local){
+			console.log('yas')
+			data.populateStorage();
+		}
+
+		return;
 	}
 	else if(e.target.getAttribute('data-opt') == 'update'){
 		function _createUlUpdateMenu(obj){
@@ -755,6 +763,11 @@ function objMenuHandler(e){
 		e.target.parentElement.parentElement.firstChild.remove();
 		lineComponent.classList.add('line-n-update-menu');
 
+		if(data.userSetting.storage.local){
+			console.log('yas')
+			data.populateStorage();
+		}
+
 		return;
 	}
 	else if(e.target.getAttribute('data-opt') == 'complete'){
@@ -767,6 +780,14 @@ function objMenuHandler(e){
 		// update overview menu
 		cleanDisplay(overviewMenu)
 		displayMenuComponents(data.storage.getObjs(['todo', true]), overviewMenu);
+
+
+		if(data.userSetting.storage.local){
+			console.log('yas')
+			data.populateStorage();
+		}
+
+		return;
 	}
 }
 
